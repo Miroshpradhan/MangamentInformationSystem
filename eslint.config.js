@@ -3,7 +3,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-
+import react from 'eslint-plugin-react'
 export default tseslint.config(
   { ignores: ['dist'] },
   {
@@ -13,8 +13,11 @@ export default tseslint.config(
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    settings: { react: { version: '18.3' } },
+   
     plugins: {
       'react-hooks': reactHooks,
+      react,
       'react-refresh': reactRefresh,
     },
     rules: {
