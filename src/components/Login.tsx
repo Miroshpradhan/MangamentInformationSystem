@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -8,11 +8,13 @@ import { Loader } from 'semantic-ui-react';
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '@/constants';
+
 const loginSchema = Yup.object().shape({
   identifier: Yup.string().required("Identifier (email/username) is required"),
   password: Yup.string()
-    .min(8, "Password must be at least 8 characters long")
+    .min(6, "Password must be at least 8 characters long")
     .required("Password is required")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .matches(/[a-z]/, "Password must contain at least one lowercase letter")
@@ -22,7 +24,6 @@ const loginSchema = Yup.object().shape({
   municipalityCode: Yup.string().required("Municipality code is required"),
 });
 
-
 type LoginValues = {
   identifier: string;
   password: string;
@@ -30,7 +31,8 @@ type LoginValues = {
 };
 
 const Login: React.FC = () => {
-  const  navigate=useNavigate();
+  const navigate = useNavigate();
+
   const submit = async (values: LoginValues) => {
     try {
       const dataToEncrypt = JSON.stringify({
@@ -43,25 +45,22 @@ const Login: React.FC = () => {
         process.env.REACT_APP_CIPHER_SECRET || 'random'
       ).toString();
   
-      const response = await axios.post('/login', {
+      const response = await axios.post(`${API_BASE_URL}/login`, {
         data: encryptedData,
         municipalityCode: values.municipalityCode,
       });
   
-      // Assuming your response includes a token on successful login
       if (response.status === 200 && response.data.token) {
         localStorage.setItem('token', response.data.token);
         toast.success('Login successful');
         navigate('/dashboard');
       } else {
-        // Handle unexpected responses or login failure
         toast.error('Login failed. Please try again.');
       }
     } catch (error) {
-      toast.error(error as string);
+      toast.error('There was an error during login.');
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
