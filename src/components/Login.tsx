@@ -23,7 +23,6 @@ const loginSchema = Yup.object().shape({
   municipalityCode: Yup.string().required("Municipality code is required"),
 });
 
-
 type LoginValues = {
   identifier: string;
   password: string;
@@ -31,7 +30,8 @@ type LoginValues = {
 };
 
 const Login: React.FC = () => {
-  const  navigate=useNavigate();
+  const navigate = useNavigate();
+
   const submit = async (values: LoginValues) => {
     try {
       const dataToEncrypt = JSON.stringify({
@@ -58,14 +58,12 @@ const Login: React.FC = () => {
         toast.success('Login successful');
         navigate('/dashboard');
       } else {
-        // Handle unexpected responses or login failure
         toast.error('Login failed. Please try again.');
       }
     } catch (error) {
-      toast.error(error as string);
+      toast.error('There was an error during login.');
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
