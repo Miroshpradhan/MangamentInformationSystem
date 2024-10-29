@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import apiClient from "@/config/axios";
 
 // Define the initial state type
 interface Ward {
@@ -25,7 +25,7 @@ export const fetchWards = createAsyncThunk<Ward[], void, { rejectValue: string }
   'wards/fetchWards',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/wards'); // Adjust the endpoint as needed
+      const response = await apiClient.get('/wards'); // Adjust the endpoint as needed
       return response.data.data.wards.lists; // Adjust based on your API response structure
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error?.message || 'Failed to fetch wards');

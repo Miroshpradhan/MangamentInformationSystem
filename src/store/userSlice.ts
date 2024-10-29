@@ -12,6 +12,7 @@ export const addUser = createAsyncThunk<User, FormData, { state: StoreState }>(
 
       const config = {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`, 
         },
       };

@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'sonner';
@@ -9,16 +9,17 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import {  useNavigate } from 'react-router-dom';
+import apiClient from "@/config/axios";
 const loginSchema = Yup.object().shape({
   identifier: Yup.string().required("Identifier (email/username) is required"),
   password: Yup.string()
-    .min(8, "Password must be at least 8 characters long")
-    .required("Password is required")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[0-9]/, "Password must contain at least one number")
-    .matches(/[@$!%*?&#]/, "Password must contain at least one special character")
-    .matches(/^\S*$/, "Password cannot contain spaces"),
+    .min(4, "Password must be at least 8 characters long")
+    .required("Password is required"),
+    // .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    // .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    // .matches(/[0-5]/, "Password must contain at least one number")
+    // .matches(/[@$!%*?&#]/, "Password must contain at least one special character")
+    // .matches(/^\S*$/, "Password cannot contain spaces"),
   municipalityCode: Yup.string().required("Municipality code is required"),
 });
 
@@ -37,20 +38,23 @@ const Login: React.FC = () => {
         username: values.identifier,
         password: values.password,
       });
-  
+      console.log(dataToEncrypt);
       const encryptedData = CryptoJS.AES.encrypt(
         dataToEncrypt,
-        process.env.REACT_APP_CIPHER_SECRET || 'random'
+      //  process.env.REACT_APP_CIPHER_SECRET || 'random'
+      'random'
       ).toString();
+      console.log(encryptedData);
   
-      const response = await axios.post('/login', {
+      const response = await apiClient.post('/login', {
         data: encryptedData,
         municipalityCode: values.municipalityCode,
       });
   
       // Assuming your response includes a token on successful login
-      if (response.status === 200 && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      
+      if (response.status === 200 && response.data.data.token) {
+        localStorage.setItem('token', response.data.data.token);
         toast.success('Login successful');
         navigate('/dashboard');
       } else {
