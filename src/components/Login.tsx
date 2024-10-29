@@ -14,7 +14,7 @@ import { API_BASE_URL } from '@/constants';
 const loginSchema = Yup.object().shape({
   identifier: Yup.string().required("Identifier (email/username) is required"),
   password: Yup.string()
-    .min(6, "Password must be at least 8 characters long")
+    .min(5, "Password must be at least 5 characters long")
     .required("Password is required")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .matches(/[a-z]/, "Password must contain at least one lowercase letter")
