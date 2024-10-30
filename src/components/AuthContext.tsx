@@ -41,16 +41,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(decodedToken.role);
   };
 
-
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('municipalityCode');
+    localStorage.removeItem('municipalityCode'); // Clear municipalityCode from local storage
     setIsLoggedIn(false);
     setMunicipalityId(null);
-    setMunicipalityCode(null);
+    setMunicipalityCode(null); // Reset municipalityCode state
     setRole(null);
   };
-
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, municipalityId, municipalityCode, role, login, logout }}>

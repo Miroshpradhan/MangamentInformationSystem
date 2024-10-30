@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link,Outlet, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faChartLine, faCog, faLanguage } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../AuthContext';
@@ -10,21 +10,20 @@ const AdminDashboard: React.FC = () => {
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ne'>('en'); // 'en' for English, 'ne' for Nepali
   const [activeLink, setActiveLink] = useState<string>(''); 
-
+  const { logout } = useAuth();
   
   const handleLanguageChange = (lang: 'en' | 'ne') => {
     setLanguage(lang);
     setLanguageDropdownOpen(false); 
   };
-
+ 
   const handleLinkClick = (link: string) => {
     setActiveLink(link);
   };
-const navigate = useNavigate();
-  const { logout } = useAuth();
+const navigate= useNavigate()
   const handleLogout = () => {
-    logout(); 
-    navigate('/');
+    logout();
+    navigate('/'); 
   };
 
   return (
