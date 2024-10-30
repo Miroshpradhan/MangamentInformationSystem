@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setMunicipalityId(decodedToken.municipality.id.toString()); 
       setRole(decodedToken.role);
     }
-    
     setMunicipalityCode(municipalityCode); // Set municipalityCode from local storage
   }, []);
 
@@ -36,7 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', token);
     localStorage.setItem('municipalityCode', municipalityCode); // Save municipalityCode to local storage
     setIsLoggedIn(true);
-    
     setMunicipalityCode(municipalityCode); // Set municipalityCode in state
     const decodedToken = jwtDecode<{ role: string; municipalityId: string }>(token);
     setMunicipalityId(decodedToken.municipalityId);
@@ -45,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token');
-    
     localStorage.removeItem('municipalityCode'); // Clear municipalityCode from local storage
     setIsLoggedIn(false);
     setMunicipalityId(null);
