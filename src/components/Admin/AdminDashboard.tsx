@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link,Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faChartLine, faCog, faLanguage } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../AuthContext';
 
 const AdminDashboard: React.FC = () => {
   const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -19,10 +20,11 @@ const AdminDashboard: React.FC = () => {
   const handleLinkClick = (link: string) => {
     setActiveLink(link);
   };
-const navigate= useNavigate();
+const navigate = useNavigate();
+  const { logout } = useAuth();
   const handleLogout = () => {
-    
-    navigate('/'); 
+    logout(); 
+    navigate('/');
   };
 
   return (
