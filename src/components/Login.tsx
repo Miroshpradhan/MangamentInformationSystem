@@ -51,6 +51,8 @@ const Login: React.FC = () => {
         login(token, values.municipalityCode); // Update context state
         toast.success('Login successful');
         navigate('/dashboard');
+        window.location.reload(); 
+        
       } else {
         toast.error('Login failed. Please try again.');
       }

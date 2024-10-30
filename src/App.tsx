@@ -12,7 +12,7 @@ import Wards from './components/Admin/ManagementWardsPage';
 
 function App() {
   return (
-    <AuthProvider> {/* Wrap your app with AuthProvider */}
+    <AuthProvider> 
       <Router>
         <>
           <Toaster richColors />
