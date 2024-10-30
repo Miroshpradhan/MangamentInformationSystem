@@ -1,5 +1,4 @@
 import React from 'react';
-// import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'sonner';
@@ -8,18 +7,15 @@ import { Loader } from 'semantic-ui-react';
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import apiClient from "@/config/axios";
+import { useAuth } from './AuthContext';
+
 const loginSchema = Yup.object().shape({
   identifier: Yup.string().required("Identifier (email/username) is required"),
   password: Yup.string()
-    .min(4, "Password must be at least 8 characters long")
+    .min(5, "Password must be at least 8 characters long")
     .required("Password is required"),
-    // .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    // .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    // .matches(/[0-5]/, "Password must contain at least one number")
-    // .matches(/[@$!%*?&#]/, "Password must contain at least one special character")
-    // .matches(/^\S*$/, "Password cannot contain spaces"),
   municipalityCode: Yup.string().required("Municipality code is required"),
 });
 
@@ -31,6 +27,7 @@ type LoginValues = {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const submit = async (values: LoginValues) => {
     try {
@@ -38,23 +35,20 @@ const Login: React.FC = () => {
         username: values.identifier,
         password: values.password,
       });
-      console.log(dataToEncrypt);
+
       const encryptedData = CryptoJS.AES.encrypt(
         dataToEncrypt,
-      //  process.env.REACT_APP_CIPHER_SECRET || 'random'
       'random'
       ).toString();
-      console.log(encryptedData);
-  
+
       const response = await apiClient.post('/login', {
         data: encryptedData,
         municipalityCode: values.municipalityCode,
       });
-  
-      // Assuming your response includes a token on successful login
-      
+
       if (response.status === 200 && response.data.data.token) {
-        localStorage.setItem('token', response.data.data.token);
+        const token = response.data.data.token;
+        login(token, values.municipalityCode); // Update context state
         toast.success('Login successful');
         navigate('/dashboard');
       } else {
@@ -91,11 +85,7 @@ const Login: React.FC = () => {
                   placeholder="Enter username"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
                 />
-                <ErrorMessage
-                  name="identifier"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
+                <ErrorMessage name="identifier" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
               <div className="flex flex-col items-start">
@@ -109,11 +99,7 @@ const Login: React.FC = () => {
                   placeholder="Password"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
                 />
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
+                <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
               <div className="flex flex-col items-start">
@@ -127,11 +113,7 @@ const Login: React.FC = () => {
                   placeholder="Municipality code"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
                 />
-                <ErrorMessage
-                  name="municipalityCode"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
+                <ErrorMessage name="municipalityCode" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
               <div className="mt-6">

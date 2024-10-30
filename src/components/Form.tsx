@@ -1,41 +1,110 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import SelectRoles from './SelectRoles';
 import SelectWards from './SelectWards';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { options, municipalrolesOptions, wardrolesoption, Option } from '@/types/SelectWardOptions';
+import { municipalrolesOptions, wardrolesoption, Option } from '@/types/SelectWardOptions';
+import apiClient from "@/config/axios"; 
+import { useAuth } from './AuthContext'; 
 
 const AddUserForm = () => {
+  const { municipalityId, isLoggedIn } = useAuth(); 
   const [status, setStatus] = useState('active');
   const [selectedWard, setSelectedWard] = useState<Option | null>(null);
   const [selectedRole, setSelectedRole] = useState<Option | null>(null);
+  const [wards, setWards] = useState<Option[]>([]);
 
-  // Determine the roles options based on selected ward
-  const isNagarpalika = selectedWard?.value === 'nagarpalika'; // Check if selected ward is 'nagarpalika'
-  const roleOptions = isNagarpalika ? municipalrolesOptions : wardrolesoption; // Use correct roles based on the selected ward
+  const isNagarpalika = selectedWard?.value === 'nagarpalika'; 
+  const roleOptions = isNagarpalika ? municipalrolesOptions : wardrolesoption; 
 
   const handleWardChange = (ward: Option | null) => {
     setSelectedWard(ward);
-    setSelectedRole(null); // Reset role selection when ward changes
+    setSelectedRole(null); 
+  };
+  useEffect(() => {
+    const fetchWards = async () => {
+        if (municipalityId && isLoggedIn) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await apiClient.get(`/wards/${municipalityId}`, {
+                    headers: {
+                        Authorization: token, 
+                    },
+                });
+
+                console.log('Response from wards API:', response.data); // Log the response
+
+                // Check if response data is an array
+                if (Array.isArray(response.data)) {
+                    setWards(response.data);
+                } else {
+                    console.error('Unexpected data format:', response.data);
+                    toast.error('Failed to load wards: Unexpected data format.');
+                }
+            } catch (err) {
+              console.error('Error fetching wards:', err);
+              toast.error('Failed to load wards.');
+            }
+        }
+    };
+
+    fetchWards();
+}, [municipalityId, isLoggedIn]); 
+
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedWard) {
+      toast.error('Please select a ward.');
+      return;
+    }
+    if (!selectedRole) {
+      toast.error('Please select a role.');
+      return;
+    }
+
+    const userData = {
+      username: event.currentTarget.username.value,
+      email: event.currentTarget.email.value,
+      ward: selectedWard.value,
+      role: selectedRole.value,
+      status: status,
+
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      await apiClient.post('/users', userData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success('User added successfully.');
+      // Optionally reset the form or update the state
+    } catch (err) {
+      console.error('Error adding user:', err);
+      toast.error('Failed to add user.');
+    }
   };
 
   return (
-    <form className="w-4/5 grid grid-cols-2 gap-6 bg-white p-8 rounded-lg shadow-lg">
-     
+    <form className="w-4/5 grid grid-cols-2 gap-6 bg-white p-8 rounded-lg shadow-lg" onSubmit={handleSubmit}>
       <div className="flex flex-col items-start">
         <Label className="mb-2 text-light capitalize">Username</Label>
-        <Input placeholder="Enter username" className="w-full p-2 border border-gray-300 rounded" />
+        <Input name="username" placeholder="Enter username" className="w-full p-2 border border-gray-300 rounded" required />
       </div>
 
       <div className="flex flex-col items-start">
         <Label className="mb-2 text-light capitalize">Email</Label>
-        <Input type="email" placeholder="Enter email" className="w-full p-2 border border-gray-300 rounded" />
+        <Input type="email" name="email" placeholder="Enter email" className="w-full p-2 border border-gray-300 rounded" required />
       </div>
 
       <div className="flex flex-col items-start">
         <Label className="mb-2 text-light capitalize">Ward No</Label>
         <SelectWards 
-          options={options} 
+          options={wards} 
           onChange={handleWardChange} 
           value={selectedWard} 
         />
@@ -50,6 +119,8 @@ const AddUserForm = () => {
           value={selectedRole} 
         />
       </div>
+
+    
 
       {/* Status */}
       <div className="flex flex-col items-start">

@@ -22,7 +22,7 @@ const initialState: WardsState = {
 
 // Async thunk to fetch wards
 export const fetchWards = createAsyncThunk<Ward[], void, { rejectValue: string }>(
-  'wards/fetchWards',
+  '/wards/municipalityid',
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/wards'); // Adjust the endpoint as needed
