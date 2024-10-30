@@ -1,6 +1,5 @@
 import Select from 'react-select';
 import { Option } from '@/types/SelectWardOptions';
-import {  useEffect } from 'react';
 
 interface SelectWardsProps {
   options: Option[];
@@ -8,12 +7,7 @@ interface SelectWardsProps {
   value: Option | null;
 }
 
-const SelectWards = ({ options, onChange, value }: SelectWardsProps) => {  
- 
-  useEffect(() => {
-    onChange(value);
-  }, [value, onChange]);
-
+const SelectWards = ({ options, onChange, value }: SelectWardsProps) => {
   return (
     <div className="w-full">
       <Select 
@@ -22,9 +16,10 @@ const SelectWards = ({ options, onChange, value }: SelectWardsProps) => {
         onChange={onChange} 
         getOptionLabel={(option) => option.label}
         getOptionValue={(option) => option.value}
+        placeholder="Select a ward..."
       />
     </div>
   );
-}
+};
 
 export default SelectWards;

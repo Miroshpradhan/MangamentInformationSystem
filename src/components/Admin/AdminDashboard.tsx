@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link,Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faChartLine, faCog, faLanguage } from '@fortawesome/free-solid-svg-icons';
 
@@ -8,25 +8,31 @@ const AdminDashboard: React.FC = () => {
   const [isManagementDropdownOpen, setManagementDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ne'>('en'); // 'en' for English, 'ne' for Nepali
-  const [activeLink, setActiveLink] = useState<string>(''); // Track active link
+  const [activeLink, setActiveLink] = useState<string>(''); 
 
+  
   const handleLanguageChange = (lang: 'en' | 'ne') => {
     setLanguage(lang);
-    setLanguageDropdownOpen(false); // Close dropdown after selection
+    setLanguageDropdownOpen(false); 
   };
 
   const handleLinkClick = (link: string) => {
-    setActiveLink(link); // Set active link
+    setActiveLink(link);
+  };
+const navigate= useNavigate();
+  const handleLogout = () => {
+    
+    navigate('/'); 
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <nav className="bg-gray-200 text-black flex items-center justify-between w-full p-4 shadow-md fixed top-0 left-0 z-10">
-        <div className="flex flex-col items-start"> {/* Wrap in flex column for stacking */}
+        <div className="flex flex-col items-start"> 
           <div className="font-bold text-xl">
             {language === 'en' ? 'LOCAL LEVEL PROJECT BANK' : 'व्यवस्थापन प्रणाली'}
           </div>
-          <div className="text-sm text-gray-700"> {/* Add styling for less bold text */}
+          <div className="text-sm text-gray-700"> 
             {language === 'en' ? 'Management Information System' : 'व्यवस्थापन जानकारी प्रणाली'}
           </div>
         </div>
@@ -113,7 +119,7 @@ const AdminDashboard: React.FC = () => {
           </li>
         </ul>
 
-        <div className="relative flex items-center"> {/* Profile picture on the right */}
+        <div className="relative flex items-center">
           <img
             src="./profile.jpg" 
             alt="Profile"
@@ -123,7 +129,7 @@ const AdminDashboard: React.FC = () => {
           {isProfileDropdownOpen && (
             <ul className="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg">
               <li>
-                <button onClick={() => { /* Handle logout */ }} className="block px-4 py-2 hover:bg-gray-200">
+              <button onClick={handleLogout} className="block px-4 py-2 hover:bg-gray-200">
                   {language === 'en' ? 'Logout' : 'लगआउट'}
                 </button>
               </li>
