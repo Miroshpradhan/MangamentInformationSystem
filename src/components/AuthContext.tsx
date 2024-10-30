@@ -23,8 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const municipalityCode = localStorage.getItem('municipalityCode'); // Fetch municipalityCode from local storage
     if (token) {
       setIsLoggedIn(true);
-      const decodedToken = jwtDecode<{ role: string; municipalityId: string }>(token);
-      setMunicipalityId(decodedToken.municipalityId);
+      const decodedToken = jwtDecode<{ role: string; municipality: { id: number } }>(token);
+      setMunicipalityId(decodedToken.municipality.id.toString()); 
       setRole(decodedToken.role);
     }
     setMunicipalityCode(municipalityCode); // Set municipalityCode from local storage

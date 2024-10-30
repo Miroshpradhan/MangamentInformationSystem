@@ -7,6 +7,7 @@ import { Label } from './ui/label';
 import { municipalrolesOptions, wardrolesoption, Option } from '@/types/SelectWardOptions';
 import apiClient from "@/config/axios"; 
 import { useAuth } from './AuthContext'; 
+import { jwtDecode } from 'jwt-decode';
 
 const AddUserForm = () => {
   const { municipalityId, isLoggedIn } = useAuth(); 
@@ -18,6 +19,8 @@ const AddUserForm = () => {
   const isNagarpalika = selectedWard?.value === 'nagarpalika'; 
   const roleOptions = isNagarpalika ? municipalrolesOptions : wardrolesoption; 
 
+  
+
   const handleWardChange = (ward: Option | null) => {
     setSelectedWard(ward);
     setSelectedRole(null); 
@@ -27,19 +30,19 @@ const AddUserForm = () => {
         if (municipalityId && isLoggedIn) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await apiClient.get(`/wards/${municipalityId}`, {
+                const response = await apiClient.get(`/ward/${municipalityId}`, {
                     headers: {
                         Authorization: token, 
                     },
                 });
-
-                console.log('Response from wards API:', response.data); // Log the response
+               
+                console.log('Response from wards API:', response.data.data.wards); // Log the response
 
                 // Check if response data is an array
-                if (Array.isArray(response.data)) {
-                    setWards(response.data);
+                if (Array.isArray(response.data.data.wards)) {
+                    setWards(response.data.data.wards);
                 } else {
-                    console.error('Unexpected data format:', response.data);
+                    console.error('Unexpected data format:', response.data.data);
                     toast.error('Failed to load wards: Unexpected data format.');
                 }
             } catch (err) {
@@ -78,7 +81,7 @@ const AddUserForm = () => {
       const token = localStorage.getItem('token');
       await apiClient.post('/users', userData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: token,
         },
       });
       toast.success('User added successfully.');

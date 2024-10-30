@@ -40,7 +40,7 @@ const Login: React.FC = () => {
         dataToEncrypt,
       'random'
       ).toString();
-
+      console.log(encryptedData);
       const response = await apiClient.post('/login', {
         data: encryptedData,
         municipalityCode: values.municipalityCode,
