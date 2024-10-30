@@ -39,7 +39,7 @@ const AddUserForm = () => {
 
           const permanentOptions = [
             { label: 'Nagarpalika', value: 'nagarpalika' },
-            { label: 'All', value: 'all' }
+          
           ];
           const allOptions = [...permanentOptions, ...wardOptions];
           setWards(allOptions); 
