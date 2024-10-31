@@ -12,13 +12,16 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Pull Docker image
-        run: docker pull miroshpradhan/lpbmis-frontend:latest
+        run: sudo docker pull shahchhatru/lpbmis-frontend:latest
 
-      - name: Stop existing container
+      - name: Stop and remove existing container if running
         run: |
-          docker stop lpbmis-frontend || true
-          docker rm lpbmis-frontend || true
+          sudo docker stop lpbmis-frontend || true
+          sudo docker rm lpbmis-frontend || true
 
       - name: Run new container
         run: |
-          docker run -d --name lpbmis-frontend -p 80:80 miroshpradhan/lpbmis-frontend:latest
+          sudo docker run -d \
+            --name lpbmis-frontend \
+            -p 80:80 \
+            shahchhatru/lpbmis-frontend:latest
