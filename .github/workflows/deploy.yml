@@ -24,4 +24,4 @@ jobs:
           sudo docker run -d \
             --name lpbmis-frontend \
             -p 3001:80 \
-            shahchhatru/lpbmis-frontend:latest
+            miroshpradhan/lpbmis-frontend:latest
