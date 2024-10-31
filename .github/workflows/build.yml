@@ -23,6 +23,3 @@ jobs:
 
       - name: Push Docker image
         run: docker push miroshpradhan/lpbmis-frontend:latest
-
-    outputs:
-      image: miroshpradhan/lpbmis-frontend:latest

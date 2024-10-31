@@ -21,4 +21,4 @@ jobs:
 
       - name: Run new container
         run: |
-          docker run -d --name lpbmis-frontend -p 80:80 mirohspradhan/lpbmis-frontend:latest
+          docker run -d --name lpbmis-frontend -p 80:80 miroshpradhan/lpbmis-frontend:latest
