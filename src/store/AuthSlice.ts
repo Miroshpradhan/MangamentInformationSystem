@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import CryptoJS from 'crypto-js'; // Ensure you're using the same encryption library
+
 
 // Define a type for the state
 interface AuthState {

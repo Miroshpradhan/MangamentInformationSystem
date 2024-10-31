@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faChartLine, faCog, faLanguage } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../AuthContext';
