@@ -13,7 +13,7 @@ import AddProjectForm from './components/Projects/AddProjectForm';
 
 function App() {
   return (
-   //  <AuthProvider> 
+   <AuthProvider> 
       <Router>
         <>
           <Toaster richColors />
@@ -40,7 +40,7 @@ function App() {
           </Routes>
         </>
       </Router>
-       //</AuthProvider> 
+      </AuthProvider> 
    
   );
 }

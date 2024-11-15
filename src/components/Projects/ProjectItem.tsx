@@ -6,6 +6,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import {Button} from '@/components/ui/button';
+import { FilePenLine } from 'lucide-react';
 
 interface ProjectItem{
     name:string;
@@ -16,7 +17,10 @@ export default function ProjectItem({name,description}:ProjectItem) {
   return (
 <Card>
   <CardHeader>
+    <div className="flex justify-between">
     <CardTitle>{name}</CardTitle>
+    <FilePenLine className="text-green-500 cursor-pointer"/>
+    </div>
  </CardHeader>
   <CardContent>
    {description}
