@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import axios from "axios";  // For making API requests
-
+import { EditProjectDialog } from "./EditProjectDialog";
 interface ProjectItemProps {
   id: number;
   name: string;
@@ -11,6 +11,11 @@ interface ProjectItemProps {
   onStatusChange: (newStatus: string) => void;  // Callback to refresh status after approval/disapproval
   canEdit: boolean;  // Prop to determine if the project can be edited
   isBackendUp: boolean; // To simulate backend response if the server is down
+
+
+interface ProjectItem{
+    name:string;
+    description:string;
 }
 
 const ProjectItem = ({ id, name, description, status, onStatusChange, canEdit, isBackendUp }: ProjectItemProps) => {
@@ -57,37 +62,59 @@ const ProjectItem = ({ id, name, description, status, onStatusChange, canEdit, i
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{name}</CardTitle>
-      </CardHeader>
-      <CardContent>{description}</CardContent>
-      <CardFooter className="flex justify-between">
-        {status === 'pending' && canEdit ? (
-          <>
-            <Button
-              onClick={handleApprove}
-              className="bg-green-500 hover:bg-green-900"
-              disabled={loading}
-            >
-              APPROVE
-            </Button>
-            <Button
-              onClick={handleDisapprove}
-              className="bg-red-500 hover:bg-red-900"
-              disabled={loading}
-            >
-              DISAPPROVE
-            </Button>
-          </>
-        ) : null}
+//     <Card>
+//       <CardHeader>
+//         <CardTitle>{name}</CardTitle>
+//         <EditProjectDialog projectName={name} projectDetails={description}  projectDeadline="" projectStatus="good" projectType="urgent"/>  </div>
 
-        {status !== 'pending' ? (
-          <span>{`Project is ${status}`}</span>
-        ) : null}
-      </CardFooter>
-    </Card>
-  );
-};
+//       </CardHeader>
+//       <CardContent>{description}</CardContent>
+//       <CardFooter className="flex justify-between">
+//         {status === 'pending' && canEdit ? (
+//           <>
+//             <Button
+//               onClick={handleApprove}
+//               className="bg-green-500 hover:bg-green-900"
+//               disabled={loading}
+//             >
+//               APPROVE
+//             </Button>
+//             <Button
+//               onClick={handleDisapprove}
+//               className="bg-red-500 hover:bg-red-900"
+//               disabled={loading}
+//             >
+//               DISAPPROVE
+//             </Button>
+//           </>
+//         ) : null}
+
+//         {status !== 'pending' ? (
+//           <span>{`Project is ${status}`}</span>
+//         ) : null}
+//       </CardFooter>
+//     </Card>
+//   );
+// };
+<Card>
+  <CardHeader>
+    <div className="flex justify-between">
+    <CardTitle>{name}</CardTitle>
+    <EditProjectDialog projectName={name} projectDetails={description}  projectDeadline="" projectStatus="good" projectType="urgent"/>  </div>
+ </CardHeader>
+  <CardContent>
+   {description}
+  </CardContent>
+  <CardFooter className="flex justify-between">
+    <Button className="bg-green-500 hover:bg-green-900">
+        APPROVE
+    </Button>
+    <Button className="bg-red-500 hover:bg-red-900">
+        DISAPPROVE
+    </Button>
+  </CardFooter>
+</Card>
+  )
+}
 
 export default ProjectItem;

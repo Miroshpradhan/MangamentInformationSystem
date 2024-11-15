@@ -15,7 +15,11 @@ import ProjectItem from './components/Projects/ProjectItem';
 
 function App() {
   return (
+<<<<<<< HEAD
     <AuthProvider> 
+=======
+   <AuthProvider> 
+>>>>>>> b2deaea98fd6acbd71288a25ca130c632acd3b1c
       <Router>
         <>
           <Toaster richColors />
@@ -43,7 +47,11 @@ function App() {
           </Routes>
         </>
       </Router>
+<<<<<<< HEAD
        </AuthProvider> 
+=======
+      </AuthProvider> 
+>>>>>>> b2deaea98fd6acbd71288a25ca130c632acd3b1c
    
   );
 }
