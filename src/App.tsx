@@ -10,10 +10,12 @@ import Programs from './components/Admin/ProgramPage';
 import Users from './components/Admin/ManagmentUsersPage';
 import Wards from './components/Admin/ManagementWardsPage';
 import AddProjectForm from './components/Projects/AddProjectForm';
+import DashboardPage from './components/Admin/DashboardPage';
+import ProjectItem from './components/Projects/ProjectItem';
 
 function App() {
   return (
-   //  <AuthProvider> 
+    <AuthProvider> 
       <Router>
         <>
           <Toaster richColors />
@@ -22,13 +24,14 @@ function App() {
             <Route path="/" element={<Login />} />
             <Route path="/addproject" element={<AddProjectForm />} />
             <Route path="/viewproject" element={<ProjectLists/>} />
+            <Route path="/approveproject" element={<ProjectItem/>} />
             <Route path="/dashboards" element={
               <div className='w-full flex justify-center items-center h-[90vh] p-0 m-0'>
                 <AddUserForm />
               </div>
             } />
             <Route path="/dashboard" element={<AdminDashboard />}>
-              <Route index element={<div>Select an option from the menu</div>} />
+            <Route index element={<DashboardPage/>} />
               <Route path="grants" element={<Grants />} />
               <Route path="programs" element={<Programs />} />
               <Route path="management/users" element={<Users />} />
@@ -40,7 +43,7 @@ function App() {
           </Routes>
         </>
       </Router>
-       //</AuthProvider> 
+       </AuthProvider> 
    
   );
 }

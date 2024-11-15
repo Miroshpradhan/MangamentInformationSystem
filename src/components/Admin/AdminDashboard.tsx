@@ -141,15 +141,9 @@ const navigate= useNavigate()
 
       {/* Main Content */}
       <main className="flex-1 p-6 mt-16">
-        <h1 className="text-2xl font-bold mb-1">
-          {language === 'en' ? 'Welcome to the Admin Dashboard' : 'व्यवस्थापन ड्यासबोर्डमा स्वागत छ'}
-        </h1>
-        <p className="text-gray-600">
-          {language === 'en' ? 'Manage your projects and grants effectively.' : 'तपाईंको परियोजनाहरू र अनुदानहरू प्रभावकारी रूपमा व्यवस्थापन गर्नुहोस्।'}
-        </p>
-        <p className="text-gray-600 mb-4">
-          {language === 'en' ? 'Use the navigation to access different sections.' : 'विभिन्न खण्डहरूमा पहुँच गर्न नेविगेसन प्रयोग गर्नुहोस्।'}
-        </p>
+     
+      
+       
         <div className="bg-white p-6 rounded-lg shadow-md">
           {/* Outlet for nested routes */}
           <Outlet />
