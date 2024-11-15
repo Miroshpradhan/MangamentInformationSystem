@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext'; // Import your AuthProvider
+import ProjectLists from './components/Projects/ProjectLists';
 import { Login } from './components';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import { Toaster } from "@/components/ui/sonner";
@@ -20,7 +21,7 @@ function App() {
           
             <Route path="/" element={<Login />} />
             <Route path="/addproject" element={<AddProjectForm />} />
-           
+            <Route path="/viewproject" element={<ProjectLists/>} />
             <Route path="/dashboards" element={
               <div className='w-full flex justify-center items-center h-[90vh] p-0 m-0'>
                 <AddUserForm />
