@@ -8,15 +8,19 @@ import Grants from './components/Admin/Grantpage';
 import Programs from './components/Admin/ProgramPage';
 import Users from './components/Admin/ManagmentUsersPage';
 import Wards from './components/Admin/ManagementWardsPage';
+import AddProjectForm from './components/Projects/AddProjectForm';
 
 function App() {
   return (
-    <AuthProvider> 
+   //  <AuthProvider> 
       <Router>
         <>
           <Toaster richColors />
           <Routes>
+          
             <Route path="/" element={<Login />} />
+            <Route path="/addproject" element={<AddProjectForm />} />
+           
             <Route path="/dashboards" element={
               <div className='w-full flex justify-center items-center h-[90vh] p-0 m-0'>
                 <AddUserForm />
@@ -31,10 +35,12 @@ function App() {
             </Route>
             <Route path="/demodashboard" element={<AdminDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+           
           </Routes>
         </>
       </Router>
-    </AuthProvider>
+       //</AuthProvider> 
+   
   );
 }
 
