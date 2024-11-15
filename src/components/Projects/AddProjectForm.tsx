@@ -10,9 +10,20 @@ import {Label,Input,Textarea,Button} from '@/components/ui'
       <Input name="username" placeholder="Enter username" className="w-full p-2 border border-gray-300 rounded" required />
       </div>
       <div className="flex flex-col items-start col-span-6">
-      <Label className="mb-2 text-light capitalize">Project Name</Label>
-      <Input name="username" placeholder="Enter username" className="w-full p-2 border border-gray-300 rounded" required />
+      <Label className="mb-2 text-light capitalize">Project Type</Label>
+      <Input name="username" placeholder="Enter Type" className="w-full p-2 border border-gray-300 rounded" required />
       </div>
+
+      <div className="flex flex-col items-start col-span-6">
+      <Label className="mb-2 text-light capitalize">Project Deadline</Label>
+      <Input name="username" placeholder="Enter project deadline" className="w-full p-2 border border-gray-300 rounded" type="date" required />
+      </div>
+
+      <div className="flex flex-col items-start col-span-6">
+      <Label className="mb-2 text-light capitalize">Project Status</Label>
+      <Input name="status" placeholder="Enter project status" className="w-full p-2 border border-gray-300 rounded" required />
+      </div>
+
       <div className="flex flex-col items-start col-span-6 md:col-span-full row-span-3">
       <Label className="mb-2 text-light capitalize">Project Details</Label>
       <Textarea name="username" placeholder="Enter project details" className="w-full p-2 border border-gray-300 rounded" required />
