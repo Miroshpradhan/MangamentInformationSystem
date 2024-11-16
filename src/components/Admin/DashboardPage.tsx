@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import EditProjectForm from '../Projects/editProject';// Import the EditProjectForm
 import AddInitialProjectForm from '../Projects/draftproject';
 import { useAuth } from '../AuthContext';
+import apiClient from "@/config/axios";
 interface Project {
   id: number;
   name: string;
@@ -28,9 +29,9 @@ const DashboardPage = () => {
     setProjects(exampleProjects); // Set initial projects on mount only
   }, []); // Empty dependency array ensures this runs only once when the component mounts
 
-  useEffect(() => {
-    setFilteredProjects(userRole === 'user' ? exampleProjects.filter(p => p.ward === 'Ward 1') : exampleProjects);
-  }, [userRole]);  // This handles only filtering based on role
+  // useEffect(() => {
+  //   setFilteredProjects(userRole === 'user' ? exampleProjects.filter(p => p.ward === 'Ward 1') : exampleProjects);
+  // }, [userRole]);  // This handles only filtering based on role
   
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
@@ -44,20 +45,20 @@ const DashboardPage = () => {
   };
   useEffect(() => {
     const fetchProjects = async () => {
+      const token = localStorage.getItem('token');
       try {
-        const response = await fetch('/api/grantProjects', {
-          method: 'GET',
+        const response = await apiClient.get('/grantProject', {
           headers: {
             'Content-Type': 'application/json',
             // add authorization header if needed
+            Authorization: token
           },
         });
-  
-        const data = await response.json();
-        if (data.success) {
-          setProjects(data.data.project); // Assuming your API returns an array of projects in `data`
+        console.log(response);
+        if (response.status == 200) {
+          setProjects(response.data.data.project); // Assuming your API returns an array of projects in `data`
         } else {
-          console.error('Failed to fetch projects:', data.message);
+          console.error('Failed to fetch projects:', response.data);
         }
       } catch (error) {
         console.error('Error fetching projects:', error);

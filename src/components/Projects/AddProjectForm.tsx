@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Label, Input, Button } from '@/components/ui';
-
+import apiClient from "@/config/axios";
 // Function to convert number to words
 const numberToWords = (num: number): string => {
   const ones: string[] = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -52,15 +52,21 @@ const AddProjectForm = () => {
     }
     return true;  
   };
-
+  const token = localStorage.getItem('token');
   const handleSave = () => {
+    apiClient.post('/grantProjects', {
+      headers: { Authorization: token}  
+    })
     console.log("Project saved as draft");
    
   };
-
+  
   const handleSubmit = () => {
     if (validateForm()) {
       setIsSubmitting(true);
+      apiClient.post('/grantProjects', {
+        headers: { Authorization: token}  
+      })
       console.log("Project submitted");
      
     } else {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Label, Input, Button } from "@/components/ui";
-import axios from "axios";
 import { toast } from "sonner";
+import apiClient from "@/config/axios";
 import { useAuth } from "../AuthContext";  // Assuming you have this custom hook
 
 const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
@@ -11,8 +11,8 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
   const [ward, setWard] = useState("1");
   const [projectBudgetCode, setProjectBudgetCode] = useState("");
 
-  const { token, role } = useAuth();  // Access token and role from useAuth
-  
+  //const { token, role } = useAuth();  // Access token and role from useAuth
+  const token = localStorage.getItem('token');
   const handleSaveDraft = () => {
     const projectData = {
       project_name: projectNameEnglish,
@@ -22,9 +22,8 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
       project_budget_code: projectBudgetCode,
       status: "Draft",
     };
-    axios
-      .post("/api/projects/draftProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }  
+    apiClient.post("/draftProjects", projectData, {
+        headers: { Authorization: token}  
       })
       .then((response) => {
         console.log("Project saved as draft:", response.data);
@@ -54,12 +53,10 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
     };
 
     // Submit project to backend
-    axios
-      .post("/api/projects/grantProjects", projectData, {
+    apiClient.post("/grantProjects", projectData, {
         headers: { Authorization: `Bearer ${token}` }  // Include token in headers
       })
       .then((response) => {
-        console.log("Project submitted:", response.data);
         setProjects((prevProjects) => [
           ...prevProjects,
           response.data,
