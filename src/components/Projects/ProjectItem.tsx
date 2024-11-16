@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EditProjectDialog } from "./EditProjectDialog";
+import axios from 'axios';
 
 interface ProjectItemProps {
   id: number;
@@ -12,63 +13,89 @@ interface ProjectItemProps {
   canEdit: boolean; // Prop to determine if the project can be edited
   isBackendUp: boolean; // To simulate backend response if the server is down
 }
-
-const ProjectItem = ({ id, name, description, status, onStatusChange, canEdit, isBackendUp }: ProjectItemProps) => {
+const ProjectItem = ({
+  id,
+  name,
+  description,
+  status, // 'status' now refers to the submission state ('submitted' or 'not submitted')
+  onStatusChange,
+  canEdit,
+  isBackendUp,
+}: ProjectItemProps) => {
   const [loading, setLoading] = useState(false);
 
-  const handleApprove = () => {
+  const handleSubmit = async () => {
     setLoading(true);
-    if (isBackendUp) {
-      // Simulate API approval logic here
-      setTimeout(() => {
-        onStatusChange("approved");
-        setLoading(false);
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        onStatusChange("approved");
-        setLoading(false);
-      }, 1000);
+    try {
+      if (isBackendUp) {
+        // Call the backend to submit the project (set isSubmitted to true)
+        await axios.put(`/projects/${id}/submit`);
+        onStatusChange("submitted");  // Update the status in the parent component
+      } else {
+        // Simulate submission if backend is down
+        setTimeout(() => {
+          onStatusChange("submitted");
+          setLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error submitting project:", error);
+      setLoading(false);
     }
   };
 
-  const handleDisapprove = () => {
+  const handleUnsubmit = async () => {
     setLoading(true);
-    if (isBackendUp) {
-      // Simulate API disapproval logic here
-      setTimeout(() => {
-        onStatusChange("disapproved");
-        setLoading(false);
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        onStatusChange("disapproved");
-        setLoading(false);
-      }, 1000);
+    try {
+      if (isBackendUp) {
+        // Call the backend to unsubmit the project (set isSubmitted to false)
+        await axios.put(`/projects/${id}/unsubmit`);
+        onStatusChange("not submitted");  // Update the status in the parent component
+      } else {
+        // Simulate unsubmission if backend is down
+        setTimeout(() => {
+          onStatusChange("not submitted");
+          setLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error un submitting project:", error);
+      setLoading(false);
     }
   };
 
   return (
-   
-<Card>
-  <CardHeader>
-    <div className="flex justify-between">
-    <CardTitle>{name}</CardTitle>
-    <EditProjectDialog projectName={name} projectDetails={description}  projectDeadline="" projectStatus="good" projectType="urgent"/>  </div>
- </CardHeader>
-  <CardContent>
-   {description}
-  </CardContent>
-  <CardFooter className="flex justify-between">
-    <Button className="bg-green-500 hover:bg-green-900">
-        APPROVE
-    </Button>
-    <Button className="bg-red-500 hover:bg-red-900">
-        DISAPPROVE
-    </Button>
-  </CardFooter>
-</Card>
-);
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between">
+          <CardTitle>{name}</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>{description}</CardContent>
+      <CardFooter className="flex justify-between">
+        {status === "not submitted" && canEdit ? (
+          <Button
+            onClick={handleSubmit}
+            className="bg-blue-500 hover:bg-blue-900"
+            disabled={loading}
+          >
+            SUBMIT
+          </Button>
+        ) : status === "submitted" && canEdit ? (
+          <Button
+            onClick={handleUnsubmit}
+            className="bg-gray-500 hover:bg-gray-900"
+            disabled={loading}
+          >
+            UNSUBMIT
+          </Button>
+        ) : (
+          <span>{`Project is ${status}`}</span>
+        )}
+      </CardFooter>
+    </Card>
+  );
 };
+
 
 export default ProjectItem;

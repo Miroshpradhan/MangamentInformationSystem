@@ -1,78 +1,83 @@
 import { useState } from "react";
 import { Label, Input, Button } from "@/components/ui";
-import axios from "axios";
 import { toast } from "sonner";
-import { useAuth } from "../AuthContext";  // Assuming you have this custom hook
+import apiClient from "@/config/axios"; // Import apiClient
+import { useForm } from "react-hook-form";  // Import react-hook-form
+import * as Yup from "yup";  // Import Yup for validation
+import { yupResolver } from "@hookform/resolvers/yup";  // Import yupResolver
 
-const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
-  const [projectNameEnglish, setProjectNameEnglish] = useState("");
-  const [projectNameNepali, setProjectNameNepali] = useState("");
-  const [projectStatus, setProjectStatus] = useState("new");
-  const [ward, setWard] = useState("1");
-  const [projectBudgetCode, setProjectBudgetCode] = useState("");
+const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRole }) => {
+  const token = localStorage.getItem('token');  // Access token and role from useAuth
 
-  const { token, role } = useAuth();  // Access token and role from useAuth
-  
-  const handleSaveDraft = () => {
+  // Yup validation schema
+  const schema = Yup.object().shape({
+    projectNameEnglish: Yup.string().required("Project Name (English) is required"),
+    projectNameNepali: Yup.string().required("Project Name (Nepali) is required"),
+    projectBudgetCode: Yup.string().required("Project Budget Code is required"),
+    ward: Yup.string().required("Ward is required"),
+  });
+
+  // Using react-hook-form with Yup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  // Handle saving the draft project
+  const handleSaveDraft = async (data) => {
     const projectData = {
-      project_name: projectNameEnglish,
-      project_name_nepali: projectNameNepali,
+      project_name: data.projectNameEnglish,
+      project_name_nepali: data.projectNameNepali,
       project_status: "pending", 
-      ward_id: ward,
-      project_budget_code: projectBudgetCode,
+      ward_id: data.ward,
+      project_budget_code: data.projectBudgetCode,
       status: "Draft",
     };
-    axios
-      .post("/api/projects/draftProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }  
-      })
-      .then((response) => {
-        console.log("Project saved as draft:", response.data);
-        setProjects((prevProjects) => [
-          ...prevProjects,
-          response.data,
-        ]);
-        toast.success(`Project "${projectNameEnglish}" saved as Draft!`);
-      })
-      .catch((error) => {
-        console.error("Error saving to backend:", error);
-        toast.error("Failed to save draft.");
+
+    try {
+      const response = await apiClient.post("/api/projects/draftProjects", projectData, {
+        headers: { Authorization: token },
       });
 
-    // Close the form
-    setIsFormOpen(false);
+      console.log("Project saved as draft:", response.data);
+      setProjects((prevProjects) => [...prevProjects, response.data]);
+      toast.success(`Project "${data.projectNameEnglish}" saved as Draft!`);
+    } catch (error) {
+      console.error("Error saving to backend:", error);
+      toast.error("Failed to save draft.");
+    }
+
+    setIsFormOpen(false); // Close the form
   };
 
-  const handleSubmitProject = () => {
+  // Handle submitting the project
+  const handleSubmitProject = async (data) => {
     const projectData = {
-      project_name: projectNameEnglish,
-      project_name_nepali: projectNameNepali,
-      project_status: "pending", // backend expects 'pending' for submitted
-      ward_id: ward,
-      project_budget_code: projectBudgetCode,
+      project_name: data.projectNameEnglish,
+      project_name_nepali: data.projectNameNepali,
+      project_status: "pending", 
+      ward_id: data.ward,
+      project_budget_code: data.projectBudgetCode,
       status: "Submitted",
     };
 
-    // Submit project to backend
-    axios
-      .post("/api/projects/grantProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }  // Include token in headers
-      })
-      .then((response) => {
-        console.log("Project submitted:", response.data);
-        setProjects((prevProjects) => [
-          ...prevProjects,
-          response.data,
-        ]);
-        toast.success(`Project "${projectNameEnglish}" submitted successfully!`);
-      })
-      .catch((error) => {
-        console.error("Error submitting project:", error);
-        toast.error("Failed to submit project.");
+    try {
+      const response = await apiClient.post("/api/projects/grantProjects", projectData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-    // Close the form
-    setIsFormOpen(false);
+      console.log("Project submitted:", response.data);
+      setProjects((prevProjects) => [...prevProjects, response.data]);
+      toast.success(`Project "${data.projectNameEnglish}" submitted successfully!`);
+    } catch (error) {
+      console.error("Error submitting project:", error);
+      toast.error("Failed to submit project.");
+    }
+
+    setIsFormOpen(false); // Close the form
   };
 
   return (
@@ -83,23 +88,23 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
             <div className="flex flex-col space-y-4">
               <Label className="text-sm font-semibold">Project Name (English)</Label>
               <Input
-                name="projectNameEnglish"
-                value={projectNameEnglish}
-                onChange={(e) => setProjectNameEnglish(e.target.value)}
+                {...register("projectNameEnglish")}  // Register input with react-hook-form
                 placeholder="Enter Project Name"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
+              {errors.projectNameEnglish && (
+                <span className="text-red-500 text-sm">{errors.projectNameEnglish.message}</span>
+              )}
 
               <Label className="text-sm font-semibold">Project Budget Code</Label>
               <Input
-                name="projectBudgetCode"
-                value={projectBudgetCode}
-                onChange={(e) => setProjectBudgetCode(e.target.value)}
+                {...register("projectBudgetCode")}  // Register input with react-hook-form
                 placeholder="Enter Project Budget Code"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
+              {errors.projectBudgetCode && (
+                <span className="text-red-500 text-sm">{errors.projectBudgetCode.message}</span>
+              )}
 
               <Label className="text-sm font-semibold">Project Status</Label>
               <div className="flex space-x-4">
@@ -107,10 +112,9 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
                   <input
                     type="radio"
                     id="new"
-                    name="status"
+                    {...register("status")}
                     value="new"
-                    checked={projectStatus === "new"}
-                    onChange={() => setProjectStatus("new")}
+                    className="form-radio"
                   />
                   <Label htmlFor="new" className="ml-2 text-sm">New</Label>
                 </div>
@@ -118,10 +122,9 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
                   <input
                     type="radio"
                     id="ongoing"
-                    name="status"
+                    {...register("status")}
                     value="ongoing"
-                    checked={projectStatus === "ongoing"}
-                    onChange={() => setProjectStatus("ongoing")}
+                    className="form-radio"
                   />
                   <Label htmlFor="ongoing" className="ml-2 text-sm">Ongoing</Label>
                 </div>
@@ -133,47 +136,48 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
         <div className="flex flex-col space-y-4">
           <Label className="text-sm font-semibold">Project Name (Nepali)</Label>
           <Input
-            name="projectNameNepali"
-            value={projectNameNepali}
-            onChange={(e) => setProjectNameNepali(e.target.value)}
+            {...register("projectNameNepali")}
             placeholder="Enter Project Name"
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
+          {errors.projectNameNepali && (
+            <span className="text-red-500 text-sm">{errors.projectNameNepali.message}</span>
+          )}
 
           <Label className="text-sm font-semibold">Ward</Label>
           <Input
-            name="ward"
-            value={ward}
-            onChange={(e) => setWard(e.target.value)}
+            {...register("ward")}
             placeholder="Enter Ward"
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
+          {errors.ward && (
+            <span className="text-red-500 text-sm">{errors.ward.message}</span>
+          )}
 
-<div className="flex justify-end mt-6 space-x-4">
+          <div className="flex justify-end mt-6 space-x-4">
             <Button
-              onClick={handleSaveDraft}
+              onClick={handleSubmit(handleSaveDraft)} // Handle save draft
               className="w-[200px] py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none"
             >
               Save Draft
             </Button>
             <Button
-              onClick={handleSubmitProject}
+              onClick={handleSubmit(handleSubmitProject)} // Handle submit project
               className="w-[200px] py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
             >
               Submit Project
             </Button>
           </div>
+          
           <div className="flex justify-end mt-4">
-        <button
-          type="button"
-          onClick={cancelForm} // Call cancelForm to close the form
-          className="bg-red-500 text-white p-2 rounded"
-        >
-          Cancel
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={cancelForm} // Call cancelForm to close the form
+              className="bg-red-500 text-white p-2 rounded"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

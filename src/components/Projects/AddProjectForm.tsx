@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Label, Input, Button } from '@/components/ui';
-
+import { apiClient } from "@/config";
 // Function to convert number to words
 const numberToWords = (num: number): string => {
   const ones: string[] = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -52,19 +52,48 @@ const AddProjectForm = () => {
     }
     return true;  
   };
-
-  const handleSave = () => {
-    console.log("Project saved as draft");
-   
+  const handleSave = async (data) => {
+    const projectData = {
+      project_name: data.projectNameEnglish,
+      project_name_nepali: data.projectNameNepali,
+      project_status: "pending",
+      ward_id: data.ward,
+      project_budget_code: data.projectBudgetCode,
+      status: "Draft",
+    };
+  
+    try {
+      const response = await apiClient.post("/api/projects/draftProjects", projectData, {
+        headers: { Authorization: token },
+      });
+  
+      console.log("Project saved as draft:", response.data);
+      toast.success(`Project "${data.projectNameEnglish}" saved as Draft!`);
+    } catch (error) {
+      console.error("Error saving to backend:", error);
+      toast.error("Failed to save draft.");
+    }
+    setIsFormOpen(false); // Close the form
   };
+  
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      setIsSubmitting(true);
-      console.log("Project submitted");
-     
-    } else {
-      alert("Please fill in all required fields.");
+  // Form submission handler
+  const handleSubmit = async (values: { totalCost: string; costInWords: string; projectStatus: string; isApproved: boolean }) => {
+    setIsSubmitting(true);
+    try {
+      // Call the API to submit the form data
+      await apiClient.post('/projects', {
+        totalCost: values.totalCost,
+        costInWords: costInWords,
+        projectStatus: values.projectStatus,
+        isApproved: values.isApproved,
+      });
+      alert("Project submitted successfully.");
+    } catch (error) {
+      console.error("Error submitting project:", error);
+      alert("Failed to submit project.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

@@ -25,7 +25,10 @@ const navigate= useNavigate()
     logout();
     navigate('/'); 
   };
+  const [isOpen, setIsOpen] = useState(false);
 
+  const toggleDropdown = () => setIsOpen(!isOpen);
+  const closeDropdown = () => setIsOpen(false);
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <nav className="bg-gray-200 text-black flex items-center justify-between w-full p-4 shadow-md fixed top-0 left-0 z-10">
@@ -39,16 +42,39 @@ const navigate= useNavigate()
         </div>
 
         <ul className="flex-grow flex space-x-8 items-center justify-center"> {/* Centered between logo and profile picture */}
-          <li>
-            <Link 
-              to="grants" 
-              className={`hover:text-gray-800 relative ${activeLink === 'grants' ? 'text-sky-500' : 'text-black'}`}
-              onClick={() => handleLinkClick('grants')}
-            >
-              {language === 'en' ? 'Grants' : 'अनुदानहरू'}
-              {activeLink === 'grants' && <div className="absolute -bottom-1 left-0 h-1 w-full bg-sky-500" />} {/* Underline */}
-            </Link>
-          </li>
+        <li className="relative group">
+        <Link
+        to="grants"
+        className={`relative hover:text-gray-800 ${activeLink === 'grants' ? 'text-sky-500' : 'text-black'}`}
+        onClick={() => handleLinkClick('grants')}
+        onMouseEnter={toggleDropdown} // Show on hover
+      >
+        {language === 'en' ? 'Grants' : 'अनुदानहरू'}
+        {activeLink === 'grants' && (
+          <div className="absolute -bottom-1 left-0 h-1 w-full bg-sky-500" />
+        )}
+      </Link>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute left-0 mt-2 space-y-2 bg-white border rounded shadow-lg z-10">
+          <Link
+            to="/dashboard/grants"
+            className="block px-4 py-2 text-black hover:bg-gray-200"
+            onClick={closeDropdown} // Close dropdown on click
+          >
+            {language === 'en' ? 'Project Grant' : 'परियोजना अनुदान'}
+          </Link>
+          <Link
+            to="/dashboard/grant-proposal"
+            className="block px-4 py-2 text-black hover:bg-gray-200"
+            onClick={closeDropdown} // Close dropdown on click
+          >
+            {language === 'en' ? 'Grant Proposal' : 'अनुदान प्रस्ताव'}
+          </Link>
+        </div>
+      )}
+    </li>
           <li>
             <Link 
               to="dashboard" 

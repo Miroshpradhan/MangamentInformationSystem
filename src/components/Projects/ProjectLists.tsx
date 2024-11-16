@@ -1,91 +1,135 @@
-import { useState, useEffect } from "react";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useEffect, useState } from "react";
 import ProjectItem from "./ProjectItem";
-import { AddProjectDialog } from "./AddProjectsDialog";
+import axios from "axios";
 
-// Fake project data for initial setup
-const fakeProject = {
-  id: 1,
-  name: "Fake Project",
-  description: "This is a fake project for approval.",
-  status: "pending",
-};
+// Demo data in case the backend is down
+const demoProjects = [
+  {
+    id: 1,
+    name: "Demo Project 1",
+    description: "This is a demo project description.",
+    status: "pending",
+    canEdit: true,
+    isBackendUp: false,
+  },
+  {
+    id: 2,
+    name: "Demo Project 2",
+    description: "Another demo project description.",
+    status: "approved",
+    canEdit: false,
+    isBackendUp: false,
+  },
+  {
+    id: 3,
+    name: "Demo Project 3",
+    description: "This project is for testing purposes.",
+    status: "disapproved",
+    canEdit: true,
+    isBackendUp: false,
+  },
+];
 
+interface Project {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  canEdit: boolean;
+  isBackendUp: boolean;
+}
 
-function ProjectLists() {
-  const [projects, setProjects] = useState<any[]>([]);
-  const [isBackendUp, setIsBackendUp] = useState(true); // Simulating backend status
-  const [loading, setLoading] = useState(true);
+const ProjectList = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isBackendUp, setIsBackendUp] = useState<boolean>(true);
 
-  // Fetch projects from localStorage (or backend)
   useEffect(() => {
-    const storedProjects = localStorage.getItem("projects");
-    
-    if (storedProjects) {
-      // If projects are already in localStorage, use them
-      setProjects(JSON.parse(storedProjects));
-      setLoading(false);
-    } else {
-      // If no projects in localStorage, use the fake project
-      setProjects([fakeProject]);
-      localStorage.setItem("projects", JSON.stringify([fakeProject]));
-      setLoading(false);
-    }
-  }, []);
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get("/projects");
+        setProjects(response.data);
+        setIsBackendUp(true);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        setIsBackendUp(false);
+        setProjects(demoProjects); // Use demo data if backend is down
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Function to handle status change in the parent component
+    fetchProjects();
+  }, [isBackendUp]);
+//   const fetchProjects = async () => {
+//     try {
+//       const response = await axios.get("/projects"); // Replace with the correct endpoint
+//       setProjects(response.data);
+//       setIsBackendUp(true); // Backend is available
+//     } catch (error) {
+//       console.error("Error fetching projects:", error);
+//       setIsBackendUp(false); // Backend is down, fallback to demo data
+//       setProjects(demoProjects); // Use demo data if the backend is down
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   if (isBackendUp) {
+//     fetchProjects();
+//   } else {
+//     setLoading(false); // If backend is down, stop loading
+//   }
+// }, [isBackendUp]);
+
+// const handleStatusChange = async (projectId: number, newStatus: string) => {
+//   if (isBackendUp) {
+//     try {
+//       await axios.put(`/projects/${projectId}/status`, { status: newStatus }); // API to update status
+//       setProjects((prevProjects) =>
+//         prevProjects.map((project) =>
+//           project.id === projectId ? { ...project, status: newStatus } : project
+//         )
+//       );
+//     } catch (error) {
+//       console.error("Error updating project status:", error);
+//     }
+//   } else {
+//     setProjects((prevProjects) =>
+//       prevProjects.map((project) =>
+//         project.id === projectId ? { ...project, status: newStatus } : project
+//       )
+//     );
+//   }
+// };
   const handleStatusChange = (projectId: number, newStatus: string) => {
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
         project.id === projectId ? { ...project, status: newStatus } : project
       )
     );
-
-    // Store the updated project status in localStorage
-    localStorage.setItem("projects", JSON.stringify(projects));
   };
 
   return (
-    <div className="w-full h-[100vh] bg-blue-500 flex justify-center items-center">
-      <div className="bg-white w-3/4 h-[90vh] grid grid-cols-6 md:grid-cols-12 grid-rows-12 gap-2 p-4 rounded shadow-lg">
-        <div className="row-span-2 flex col-span-12 justify-center items-center">
-          <span className="text-xl font-semibold">All Projects</span>
-        </div>
-        <div className="bg-white w-3/4 h-[90vh] grid grid-cols-6 md:grid-cols-12 grid-rows-12 gap-2 p-4 rounded shadow-lg">
-        <div className="row-span-2 flex col-span-12 justify-between items-center px-4">
-            <span>All Projects</span> <AddProjectDialog/>
-        </div>
-        </div>
-        {/* <div className="row-span-6 col-span-12" >
-            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-                <ProjectItem name="project1" description="Hello , how are you ? description" />
-            </ScrollArea>
-        </div>
-      </div> */}
-        <div className="row-span-6 col-span-12">
-          <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-            {/* Render all ProjectItem components dynamically */}
-            {!loading ? (
-              projects.map((project) => (
-                <ProjectItem
-                  key={project.id}
-                  id={project.id}
-                  name={project.name}
-                  description={project.description}
-                  status={project.status}
-                  onStatusChange={(newStatus) => handleStatusChange(project.id, newStatus)}
-                  canEdit={project.status === "pending"}
-                  isBackendUp={isBackendUp}
-                />
-              ))
-            ) : (
-              <span>Loading projects...</span>
-            )}
-          </ScrollArea>
-</div>
-    </div>
+    <div className="project-list">
+      {loading ? (
+        <div>Loading projects...</div>
+      ) : (
+        projects.map((project) => (
+          <ProjectItem
+            key={project.id}
+            id={project.id}
+            name={project.name}
+            description={project.description}
+            status={project.isSubmitted ? "submitted" : "not submitted"}
+            onStatusChange={handleStatusChange}
+            canEdit={project.canEdit}
+            isBackendUp={isBackendUp}
+          />
+        ))
+      )}
     </div>
   );
-}
+};
 
-export default ProjectLists;
+export default ProjectList;

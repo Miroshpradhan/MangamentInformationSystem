@@ -10,54 +10,66 @@ const EditProjectForm = ({
   cancelForm,
   userRole,
 }) => {
-  // Initialize state with existing project data (if available)
   const [projectNameEnglish, setProjectNameEnglish] = useState<string>(projectData?.projectNameEnglish || "");
   const [projectNameNepali, setProjectNameNepali] = useState<string>(projectData?.projectNameNepali || "");
   const [projectStatus, setProjectStatus] = useState<string>(projectData?.projectStatus || "new");
   const [ward, setWard] = useState<string>(projectData?.ward || "1");
   const [projectBudgetCode, setProjectBudgetCode] = useState<string>(projectData?.projectBudgetCode || "");
 
-  // Handle form submission to update the project
+  // Only update the fields that were modified
   const handleUpdateProject = () => {
-    const updatedProjectData = {
-      projectNameEnglish,
-      projectNameNepali,
-      projectStatus,
-      ward,
-      projectBudgetCode,
-      status: "Submitted",
-    };
+    const updatedProjectData: any = {};
 
-    // Update the project in localStorage
-    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    const updatedProjects = savedProjects.map((project: any) =>
-      project.id === projectData.id ? { ...project, ...updatedProjectData } : project
-    );
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    if (projectNameEnglish !== projectData.projectNameEnglish) {
+      updatedProjectData.projectNameEnglish = projectNameEnglish;
+    }
+    if (projectNameNepali !== projectData.projectNameNepali) {
+      updatedProjectData.projectNameNepali = projectNameNepali;
+    }
+    if (projectStatus !== projectData.projectStatus) {
+      updatedProjectData.projectStatus = projectStatus;
+    }
+    if (ward !== projectData.ward) {
+      updatedProjectData.ward = ward;
+    }
+    if (projectBudgetCode !== projectData.projectBudgetCode) {
+      updatedProjectData.projectBudgetCode = projectBudgetCode;
+    }
 
-    setProjects((prevProjects) =>
-      prevProjects.map((project) =>
+    // Proceed only if there is a change
+    if (Object.keys(updatedProjectData).length > 0) {
+      const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+      const updatedProjects = savedProjects.map((project: any) =>
         project.id === projectData.id ? { ...project, ...updatedProjectData } : project
-      )
-    );
+      );
+      localStorage.setItem("projects", JSON.stringify(updatedProjects));
 
-    axios
-      .put(`/api/projects/${projectData.id}`, updatedProjectData)
-      .then((response) => {
-        console.log("Project updated:", response.data);
-        setProjects((prevProjects) =>
-          prevProjects.map((project) =>
-            project.id === projectData.id ? { ...project, ...response.data } : project
-          )
-        );
-      })
-      .catch((error) => {
-        console.error("Error updating project:", error);
-      });
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectData.id ? { ...project, ...updatedProjectData } : project
+        )
+      );
 
-    // Close form and show success notification
-    setIsFormOpen(false);
-    toast.success(`Project "${projectNameEnglish}" updated successfully!`);
+      axios
+        .put(`/api/projects/${projectData.id}`, updatedProjectData)
+        .then((response) => {
+          console.log("Project updated:", response.data);
+          setProjects((prevProjects) =>
+            prevProjects.map((project) =>
+              project.id === projectData.id ? { ...project, ...response.data } : project
+            )
+          );
+        })
+        .catch((error) => {
+          console.error("Error updating project:", error);
+        });
+
+      // Close form and show success notification
+      setIsFormOpen(false);
+      toast.success(`Project "${projectNameEnglish}" updated successfully!`);
+    } else {
+      toast.warning("No changes detected.");
+    }
   };
 
   // Handle cancel
@@ -79,7 +91,6 @@ const EditProjectForm = ({
                 onChange={(e) => setProjectNameEnglish(e.target.value)}
                 placeholder="Enter Project Name"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
 
               <Label className="text-sm font-semibold">Project Budget Code</Label>
@@ -89,7 +100,6 @@ const EditProjectForm = ({
                 onChange={(e) => setProjectBudgetCode(e.target.value)}
                 placeholder="Enter Project Budget Code"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
 
               <Label className="text-sm font-semibold">Project Status</Label>
@@ -129,7 +139,6 @@ const EditProjectForm = ({
             onChange={(e) => setProjectNameNepali(e.target.value)}
             placeholder="Enter Project Name"
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
 
           <Label className="text-sm font-semibold">Ward</Label>

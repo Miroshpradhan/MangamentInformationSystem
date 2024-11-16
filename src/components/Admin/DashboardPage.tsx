@@ -1,7 +1,8 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import EditProjectForm from '../Projects/editProject';// Import the EditProjectForm
+import EditProjectForm from '../Projects/editProject'; // Import the EditProjectForm
 import AddInitialProjectForm from '../Projects/draftproject';
 import { useAuth } from '../AuthContext';
+
 interface Project {
   id: number;
   name: string;
@@ -11,13 +12,12 @@ interface Project {
 }
 
 const DashboardPage = () => {
-  const [projects, setProjects] = useState<Project[]>([]); // Projects array
-  const userRole = useAuth();
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]); // Filtered projects
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query string
- 
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // State to control form visibility
-  const [editProjectData, setEditProjectData] = useState<Project | null>(null); // State for editing project
+  const [projects, setProjects] = useState<Project[]>([]); 
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]); 
+  const [searchQuery, setSearchQuery] = useState<string>(''); 
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); 
+  const [editProjectData, setEditProjectData] = useState<Project | null>(null);
+  const userRole =  localStorage.getItem('userRole');; 
 
   const exampleProjects: Project[] = [
     { id: 1, name: 'Yashok WSSP', ward: 'Ward 1', lastUpdated: 'Jun 16, 2022', status: 'Draft' },
@@ -25,13 +25,13 @@ const DashboardPage = () => {
   ];
 
   useEffect(() => {
-    setProjects(exampleProjects); // Set initial projects on mount only
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+    setProjects(exampleProjects); 
+  }, []); 
 
   useEffect(() => {
-    setFilteredProjects(userRole === 'user' ? exampleProjects.filter(p => p.ward === 'Ward 1') : exampleProjects);
-  }, [userRole]);  // This handles only filtering based on role
-  
+    setFilteredProjects(exampleProjects);
+  }, []);
+
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
@@ -42,31 +42,7 @@ const DashboardPage = () => {
     setEditProjectData(project); // Set the project data for editing
     setIsFormOpen(true); // Open the form in edit mode
   };
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/grantProjects', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // add authorization header if needed
-          },
-        });
-  
-        const data = await response.json();
-        if (data.success) {
-          setProjects(data.data.project); // Assuming your API returns an array of projects in `data`
-        } else {
-          console.error('Failed to fetch projects:', data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-  
-    fetchProjects();
-  }, []);
-  
+
   const handleFormSubmit = (newProject: Project) => {
     if (editProjectData) {
       // Update the existing project
@@ -133,18 +109,17 @@ const DashboardPage = () => {
       </div>
 
       <button
-  onClick={() => {
-    setEditProjectData(null); 
-    setIsFormOpen(true);
-  }}
-  className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center group"
->
-  <span className="text-2xl">+</span>
-  <span className="ml-2 hidden group-hover:inline-block transition-all duration-300 whitespace-nowrap">
-    Add New Project
-  </span>
-</button>
-
+        onClick={() => {
+          setEditProjectData(null); 
+          setIsFormOpen(true);
+        }}
+        className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center group"
+      >
+        <span className="text-2xl">+</span>
+        <span className="ml-2 hidden group-hover:inline-block transition-all duration-300 whitespace-nowrap">
+          Add New Project
+        </span>
+      </button>
 
       {isFormOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -155,14 +130,15 @@ const DashboardPage = () => {
             >
               Cancel
             </button>
+
             {/* Conditionally render EditProjectForm if we are in edit mode */}
             {editProjectData ? (
               <EditProjectForm
-              setIsFormOpen={setIsFormOpen}
-              setProjects={handleFormSubmit}
-              userRole={userRole}
-              cancelForm={cancelForm}
-                projectData={editProjectData} // Pass the project to be edited
+                projectData={editProjectData}  // Pass the selected project data
+                setProjects={setProjects}
+                setIsFormOpen={setIsFormOpen}
+                cancelForm={cancelForm}
+                userRole={userRole}  // Pass user role as needed
               />
             ) : (
               // Add the form for creating a new project if not editing

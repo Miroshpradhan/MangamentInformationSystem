@@ -15,6 +15,7 @@ import ManagementUsersPage from './components/Admin/ManagmentUsersPage';
 import ManagementWardsPage from './components/Admin/ManagementWardsPage';
 import ProjectLists from './components/Projects/ProjectLists';
 import ProjectItem from './components/Projects/ProjectItem';
+import ApproveGrantPage from './components/Projects/ApprovaGrantPage';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
               <Route path="programs" element={<ProgramsPage/>} />
               <Route path="management/users" element={<ManagementUsersPage />} />
               <Route path="management/wards" element={<ManagementWardsPage />} />
+              {/* <Route path="/grant-proposal" element={<ApproveGrantPage/>} /> */}
             </Route>
             <Route path="/demodashboard" element={<AdminDashboard/>} />
             {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
