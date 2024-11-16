@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Label, Input, Button } from '@/components/ui';
-import { apiClient } from "@/config";
+import apiClient from "@/config/axios";
 // Function to convert number to words
 const numberToWords = (num: number): string => {
   const ones: string[] = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -63,7 +63,7 @@ const AddProjectForm = () => {
     };
   
     try {
-      const response = await apiClient.post("/api/projects/draftProjects", projectData, {
+      const response = await apiClient.post("/draftProjects", projectData, {
         headers: { Authorization: token },
       });
   
@@ -82,7 +82,7 @@ const AddProjectForm = () => {
     setIsSubmitting(true);
     try {
       // Call the API to submit the form data
-      await apiClient.post('/projects', {
+      await apiClient.post('/grantProjects', {
         totalCost: values.totalCost,
         costInWords: costInWords,
         projectStatus: values.projectStatus,

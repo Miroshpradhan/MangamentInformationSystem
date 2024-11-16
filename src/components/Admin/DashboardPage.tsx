@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import EditProjectForm from '../Projects/editProject'; // Import the EditProjectForm
 import AddInitialProjectForm from '../Projects/draftproject';
 import { useAuth } from '../AuthContext';
-
+import apiClient from "@/config/axios";
 interface Project {
   id: number;
   name: string;
@@ -17,7 +17,7 @@ const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>(''); 
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); 
   const [editProjectData, setEditProjectData] = useState<Project | null>(null);
-  const userRole =  localStorage.getItem('userRole');; 
+  const userRole =  localStorage.getItem('userRole'); 
 
   const exampleProjects: Project[] = [
     { id: 1, name: 'Yashok WSSP', ward: 'Ward 1', lastUpdated: 'Jun 16, 2022', status: 'Draft' },
@@ -28,10 +28,10 @@ const DashboardPage = () => {
     setProjects(exampleProjects); 
   }, []); 
 
-  useEffect(() => {
-    setFilteredProjects(exampleProjects);
-  }, []);
-
+  // useEffect(() => {
+  //   setFilteredProjects(userRole === 'user' ? exampleProjects.filter(p => p.ward === 'Ward 1') : exampleProjects);
+  // }, [userRole]);  // This handles only filtering based on role
+  
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
@@ -43,6 +43,31 @@ const DashboardPage = () => {
     setIsFormOpen(true); // Open the form in edit mode
   };
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await apiClient.get('/grantProject', {
+          headers: {
+            'Content-Type': 'application/json',
+            // add authorization header if needed
+            Authorization: token
+          },
+        });
+        console.log(response);
+        if (response.status == 200) {
+          setProjects(response.data.data.project); // Assuming your API returns an array of projects in `data`
+        } else {
+          console.error('Failed to fetch projects:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    };
+  
+    fetchProjects();
+  }, []);
+  
   const handleFormSubmit = (newProject: Project) => {
     if (editProjectData) {
       // Update the existing project
