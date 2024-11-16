@@ -6,7 +6,7 @@ import { useAuth } from "../AuthContext";  // Assuming you have this custom hook
 import { useForm } from "react-hook-form"; // Import useForm from react-hook-form
 
 const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRole }) => {
-  const { token } = useAuth();  // Access token from useAuth hook
+  const token = localStorage.getItem('token');
   const { register, handleSubmit, formState: { errors } } = useForm(); // Initialize react-hook-form
 
   // Handle saving the project as a draft

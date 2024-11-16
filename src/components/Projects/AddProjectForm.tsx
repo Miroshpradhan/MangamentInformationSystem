@@ -36,7 +36,7 @@ const AddProjectForm = () => {
   const [projectStatus, setProjectStatus] = useState<string>("draft");
   const [isApproved, setIsApproved] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const token = localStorage.getItem('token');
   // Update costInWords when totalCost changes
   useEffect(() => {
     const numericCost = Number(totalCost);
@@ -60,11 +60,27 @@ const AddProjectForm = () => {
       ward_id: data.ward,
       project_budget_code: data.projectBudgetCode,
       status: "Draft",
+      project_description: data.projectDescription,
+      start_date: data.startDate,
+      end_date: data.endDate,
+      budget: data.budget,
+      beneficiary_population: data.beneficiaryPopulation,
+      project_type: data.projectType,
     };
   
+    const formData = new FormData();
+  
+    // Append project data to formData
+    for (const key in projectData) {
+      formData.append(key, projectData[key]);
+    }
+  
     try {
-      const response = await apiClient.post("/draftProjects", projectData, {
-        headers: { Authorization: token },
+      const response = await apiClient.post("/draftProjects", formData, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+        },
       });
   
       console.log("Project saved as draft:", response.data);
@@ -73,20 +89,56 @@ const AddProjectForm = () => {
       console.error("Error saving to backend:", error);
       toast.error("Failed to save draft.");
     }
-    setIsFormOpen(false); // Close the form
+  
+    setIsFormOpen(false);
   };
   
-
-  // Form submission handler
-  const handleSubmit = async (values: { totalCost: string; costInWords: string; projectStatus: string; isApproved: boolean }) => {
+  const handleSubmit = async (values: { 
+    municipality: string; 
+    phone: string;
+    projectName: string;
+    totalCost: string;
+    costInWords: string;
+    projectStatus: string;
+    duration: string;
+    populationBenefits: string;
+    isApproved: boolean;
+    documents: {
+      document1: File | null;
+      document2: File | null;
+      document3: File | null;
+      document4: File | null;
+      document5: File | null;
+    }
+  }) => {
     setIsSubmitting(true);
+    
+    // Prepare the form data object
+    const formData = new FormData();
+    formData.append("municipality", values.municipality);
+    formData.append("phone", values.phone);
+    formData.append("projectName", values.projectName);
+    formData.append("totalCost", values.totalCost);
+    formData.append("costInWords", costInWords); // cost in words
+    formData.append("projectStatus", values.projectStatus);
+    formData.append("duration", values.duration);
+    formData.append("populationBenefits", values.populationBenefits);
+    formData.append("isApproved", String(values.isApproved));
+  
+    // Append document files if provided
+    if (values.documents.document1) formData.append("document1", values.documents.document1);
+    if (values.documents.document2) formData.append("document2", values.documents.document2);
+    if (values.documents.document3) formData.append("document3", values.documents.document3);
+    if (values.documents.document4) formData.append("document4", values.documents.document4);
+    if (values.documents.document5) formData.append("document5", values.documents.document5);
+  
     try {
       // Call the API to submit the form data
-      await apiClient.post('/grantProjects', {
-        totalCost: values.totalCost,
-        costInWords: costInWords,
-        projectStatus: values.projectStatus,
-        isApproved: values.isApproved,
+      await apiClient.post('/grantProjects', formData, {
+        headers: {
+          Authorization: token,  
+          "Content-Type": "multipart/form-data",
+        },
       });
       alert("Project submitted successfully.");
     } catch (error) {
@@ -96,7 +148,7 @@ const AddProjectForm = () => {
       setIsSubmitting(false);
     }
   };
-
+  
   const handleTotalCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
  

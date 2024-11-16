@@ -3,6 +3,7 @@ import EditProjectForm from '../Projects/editProject'; // Import the EditProject
 import AddInitialProjectForm from '../Projects/draftproject';
 import { useAuth } from '../AuthContext';
 import apiClient from "@/config/axios";
+
 interface Project {
   id: number;
   name: string;
@@ -12,51 +13,26 @@ interface Project {
 }
 
 const DashboardPage = () => {
-  const [projects, setProjects] = useState<Project[]>([]); 
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]); 
-  const [searchQuery, setSearchQuery] = useState<string>(''); 
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); 
+  const [projects, setProjects] = useState<Project[]>([]); // Store fetched projects
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]); // Store filtered projects based on search query
+  const [searchQuery, setSearchQuery] = useState<string>(''); // For search functionality
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // For form visibility
   const [editProjectData, setEditProjectData] = useState<Project | null>(null);
-  const userRole =  localStorage.getItem('userRole'); 
-
-  const exampleProjects: Project[] = [
-    { id: 1, name: 'Yashok WSSP', ward: 'Ward 1', lastUpdated: 'Jun 16, 2022', status: 'Draft' },
-    { id: 2, name: 'Panchthar WSSP', ward: 'Ward 3', lastUpdated: 'Jun 16, 2022', status: 'Ongoing' },
-  ];
-
-  useEffect(() => {
-    setProjects(exampleProjects); 
-  }, []); 
-
-  // useEffect(() => {
-  //   setFilteredProjects(userRole === 'user' ? exampleProjects.filter(p => p.ward === 'Ward 1') : exampleProjects);
-  // }, [userRole]);  // This handles only filtering based on role
-  
-  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-    setFilteredProjects(projects.filter(project => project.name.toLowerCase().includes(query)));
-  };
-
-  const handleEdit = (project: Project) => {
-    setEditProjectData(project); // Set the project data for editing
-    setIsFormOpen(true); // Open the form in edit mode
-  };
+  const userRole = localStorage.getItem('userRole'); 
 
   useEffect(() => {
     const fetchProjects = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await apiClient.get('/grantProject', {
+        const response = await apiClient.get('/grantProjects', {
           headers: {
             'Content-Type': 'application/json',
-            // add authorization header if needed
-            Authorization: token
+            Authorization: token, // Add the token if required
           },
         });
-        console.log(response);
-        if (response.status == 200) {
-          setProjects(response.data.data.project); // Assuming your API returns an array of projects in `data`
+
+        if (response.status === 200) {
+          setProjects(response.data.data.project); // Assuming the API returns the project list in `data.data.project`
         } else {
           console.error('Failed to fetch projects:', response.data);
         }
@@ -64,10 +40,29 @@ const DashboardPage = () => {
         console.error('Error fetching projects:', error);
       }
     };
-  
+
     fetchProjects();
-  }, []);
-  
+  }, []); // Fetch projects only once when the component mounts
+
+  useEffect(() => {
+    // Filter projects based on the search query
+    setFilteredProjects(
+      projects.filter((project) =>
+        project.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [projects, searchQuery]); // Filter projects when `projects` or `searchQuery` changes
+
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query); // Set search query
+  };
+
+  const handleEdit = (project: Project) => {
+    setEditProjectData(project); // Set the project data for editing
+    setIsFormOpen(true); // Open the form in edit mode
+  };
+
   const handleFormSubmit = (newProject: Project) => {
     if (editProjectData) {
       // Update the existing project
@@ -111,8 +106,11 @@ const DashboardPage = () => {
       </div>
 
       <div className="space-y-4">
-        {filteredProjects.map(project => (
-          <div key={project.id} className="border p-4 rounded shadow-md flex justify-between items-center">
+        {filteredProjects.map((project) => (
+          <div
+            key={project.id}
+            className="border p-4 rounded shadow-md flex justify-between items-center"
+          >
             <div>
               <h3 className="font-bold text-lg">{project.name}</h3>
               <p className="text-sm text-gray-600">Last updated: {project.lastUpdated}</p>
@@ -124,7 +122,10 @@ const DashboardPage = () => {
               </p>
             </div>
             <div className="flex space-x-2">
-              <button onClick={() => handleEdit(project)} className="p-2 bg-blue-500 text-white rounded">
+              <button
+                onClick={() => handleEdit(project)}
+                className="p-2 bg-blue-500 text-white rounded"
+              >
                 Edit
               </button>
               <button className="p-2 bg-red-500 text-white rounded">Delete</button>
@@ -135,7 +136,7 @@ const DashboardPage = () => {
 
       <button
         onClick={() => {
-          setEditProjectData(null); 
+          setEditProjectData(null);
           setIsFormOpen(true);
         }}
         className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center group"
