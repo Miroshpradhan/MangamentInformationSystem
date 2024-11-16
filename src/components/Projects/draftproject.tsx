@@ -3,17 +3,14 @@ import { Label, Input, Button } from "@/components/ui";
 import { toast } from "sonner";
 import apiClient from "@/config/axios";
 import { useAuth } from "../AuthContext";  // Assuming you have this custom hook
+import { useForm } from "react-hook-form"; // Import useForm from react-hook-form
 
-const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm,userRole }) => {
-  const [projectNameEnglish, setProjectNameEnglish] = useState("");
-  const [projectNameNepali, setProjectNameNepali] = useState("");
-  const [projectStatus, setProjectStatus] = useState("new");
-  const [ward, setWard] = useState("1");
-  const [projectBudgetCode, setProjectBudgetCode] = useState("");
+const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRole }) => {
+  const { token } = useAuth();  // Access token from useAuth hook
+  const { register, handleSubmit, formState: { errors } } = useForm(); // Initialize react-hook-form
 
-  //const { token, role } = useAuth();  // Access token and role from useAuth
-  const token = localStorage.getItem('token');
-  const handleSaveDraft = () => {
+  // Handle saving the project as a draft
+  const handleSaveDraft = async (data) => {
     const projectData = {
       project_name: data.projectNameEnglish,
       project_name_nepali: data.projectNameNepali,
@@ -22,31 +19,21 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm,userRole
       project_budget_code: data.projectBudgetCode,
       status: "Draft",
     };
-    apiClient.post("/draftProjects", projectData, {
-        headers: { Authorization: token}  
-      })
-      .then((response) => {
-        console.log("Project saved as draft:", response.data);
-        setProjects((prevProjects) => [
-          ...prevProjects,
-          response.data,
-        ]);
-        toast.success(`Project "${projectNameEnglish}" saved as Draft!`);
-      })
-      .catch((error) => {
-        console.error("Error saving to backend:", error);
-        toast.error("Failed to save draft.");
-      });
 
-      console.log("Project saved as draft:", response.data);
-      setProjects((prevProjects) => [...prevProjects, response.data]);
+    try {
+      const response = await apiClient.post("/draftProjects", projectData, {
+        headers: { Authorization: `Bearer ${token}` }  // Include token in headers
+      });
+      setProjects((prevProjects) => [
+        ...prevProjects,
+        response.data,
+      ]);
       toast.success(`Project "${data.projectNameEnglish}" saved as Draft!`);
+      setIsFormOpen(false); // Close the form
     } catch (error) {
       console.error("Error saving to backend:", error);
       toast.error("Failed to save draft.");
     }
-
-    setIsFormOpen(false); // Close the form
   };
 
   // Handle submitting the project
@@ -60,31 +47,20 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm,userRole
       status: "Submitted",
     };
 
-    // Submit project to backend
-    apiClient.post("/grantProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }  // Include token in headers
-      })
-      .then((response) => {
-        setProjects((prevProjects) => [
-          ...prevProjects,
-          response.data,
-        ]);
-        toast.success(`Project "${projectNameEnglish}" submitted successfully!`);
-      })
-      .catch((error) => {
-        console.error("Error submitting project:", error);
-        toast.error("Failed to submit project.");
+    try {
+      const response = await apiClient.post("/grantProjects", projectData, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      console.log("Project submitted:", response.data);
-      setProjects((prevProjects) => [...prevProjects, response.data]);
+      setProjects((prevProjects) => [
+        ...prevProjects,
+        response.data,
+      ]);
       toast.success(`Project "${data.projectNameEnglish}" submitted successfully!`);
+      setIsFormOpen(false); // Close the form
     } catch (error) {
       console.error("Error submitting project:", error);
       toast.error("Failed to submit project.");
     }
-
-    setIsFormOpen(false); // Close the form
   };
 
   return (
@@ -95,7 +71,7 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm,userRole
             <div className="flex flex-col space-y-4">
               <Label className="text-sm font-semibold">Project Name (English)</Label>
               <Input
-                {...register("projectNameEnglish")}  // Register input with react-hook-form
+                {...register("projectNameEnglish", { required: "This field is required" })} // Validation
                 placeholder="Enter Project Name"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -105,7 +81,7 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm,userRole
 
               <Label className="text-sm font-semibold">Project Budget Code</Label>
               <Input
-                {...register("projectBudgetCode")}  // Register input with react-hook-form
+                {...register("projectBudgetCode", { required: "This field is required" })}
                 placeholder="Enter Project Budget Code"
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
