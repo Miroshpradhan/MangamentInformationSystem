@@ -35,14 +35,12 @@ const EditProjectForm = ({
     );
     localStorage.setItem("projects", JSON.stringify(updatedProjects));
 
-    // Update the state of projects in the parent component
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
         project.id === projectData.id ? { ...project, ...updatedProjectData } : project
       )
     );
 
-    // Update project in the backend (if needed)
     axios
       .put(`/api/projects/${projectData.id}`, updatedProjectData)
       .then((response) => {

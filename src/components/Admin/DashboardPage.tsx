@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import EditProjectForm from '../Projects/editproject'; // Import the EditProjectForm
+import EditProjectForm from '../Projects/editProject';// Import the EditProjectForm
 import AddInitialProjectForm from '../Projects/draftproject';
+import { useAuth } from '../AuthContext';
 interface Project {
   id: number;
   name: string;
@@ -11,9 +12,10 @@ interface Project {
 
 const DashboardPage = () => {
   const [projects, setProjects] = useState<Project[]>([]); // Projects array
+  const userRole = useAuth();
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]); // Filtered projects
   const [searchQuery, setSearchQuery] = useState<string>(''); // Search query string
-  const [userRole, setUserRole] = useState<'user' | 'admin'>('user'); // User role
+ 
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // State to control form visibility
   const [editProjectData, setEditProjectData] = useState<Project | null>(null); // State for editing project
 
@@ -40,7 +42,31 @@ const DashboardPage = () => {
     setEditProjectData(project); // Set the project data for editing
     setIsFormOpen(true); // Open the form in edit mode
   };
-
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/grantProjects', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // add authorization header if needed
+          },
+        });
+  
+        const data = await response.json();
+        if (data.success) {
+          setProjects(data.data.project); // Assuming your API returns an array of projects in `data`
+        } else {
+          console.error('Failed to fetch projects:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    };
+  
+    fetchProjects();
+  }, []);
+  
   const handleFormSubmit = (newProject: Project) => {
     if (editProjectData) {
       // Update the existing project
@@ -107,14 +133,18 @@ const DashboardPage = () => {
       </div>
 
       <button
-        onClick={() => {
-          setEditProjectData(null); // Ensure it's a new project form
-          setIsFormOpen(true);
-        }}
-        className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
-      >
-        <span className="text-2xl">+</span>
-      </button>
+  onClick={() => {
+    setEditProjectData(null); 
+    setIsFormOpen(true);
+  }}
+  className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center group"
+>
+  <span className="text-2xl">+</span>
+  <span className="ml-2 hidden group-hover:inline-block transition-all duration-300 whitespace-nowrap">
+    Add New Project
+  </span>
+</button>
+
 
       {isFormOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">

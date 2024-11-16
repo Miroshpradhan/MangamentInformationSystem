@@ -56,7 +56,7 @@ const navigate= useNavigate()
               onClick={() => handleLinkClick('dashboard')}
             >
               {language === 'en' ? 'Dashboard' : 'ड्यासबोर्ड'}
-              {activeLink === 'dashboard' && <div className="absolute -bottom-1 left-0 h-1 w-full bg-sky-500" />} {/* Underline */}
+              {activeLink === '' && <div className="absolute -bottom-1 left-0 h-1 w-full bg-sky-500" />} {/* Underline */}
             </Link>
           </li>
           <li>

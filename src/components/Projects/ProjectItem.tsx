@@ -49,46 +49,26 @@ const ProjectItem = ({ id, name, description, status, onStatusChange, canEdit, i
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>{name}</CardTitle>
-          {canEdit && (
-            <EditProjectDialog
-              projectName={name}
-              projectDetails={description}
-              projectDeadline=""
-              projectStatus={status}
-              projectType="urgent"
-            />
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>{description}</CardContent>
-      <CardFooter className="flex justify-between">
-        {status === "pending" && canEdit ? (
-          <>
-            <Button
-              onClick={handleApprove}
-              className="bg-green-500 hover:bg-green-900"
-              disabled={loading}
-            >
-              APPROVE
-            </Button>
-            <Button
-              onClick={handleDisapprove}
-              className="bg-red-500 hover:bg-red-900"
-              disabled={loading}
-            >
-              DISAPPROVE
-            </Button>
-          </>
-        ) : (
-          <span>{`Project is ${status}`}</span>
-        )}
-      </CardFooter>
-    </Card>
-  );
+   
+<Card>
+  <CardHeader>
+    <div className="flex justify-between">
+    <CardTitle>{name}</CardTitle>
+    <EditProjectDialog projectName={name} projectDetails={description}  projectDeadline="" projectStatus="good" projectType="urgent"/>  </div>
+ </CardHeader>
+  <CardContent>
+   {description}
+  </CardContent>
+  <CardFooter className="flex justify-between">
+    <Button className="bg-green-500 hover:bg-green-900">
+        APPROVE
+    </Button>
+    <Button className="bg-red-500 hover:bg-red-900">
+        DISAPPROVE
+    </Button>
+  </CardFooter>
+</Card>
+);
 };
 
 export default ProjectItem;

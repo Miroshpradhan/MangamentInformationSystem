@@ -2,87 +2,79 @@ import { useState } from "react";
 import { Label, Input, Button } from "@/components/ui";
 import axios from "axios";
 import { toast } from "sonner";
+import { useAuth } from "../AuthContext";  // Assuming you have this custom hook
 
-const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRole }) => {
-    const [projectNameEnglish, setProjectNameEnglish] = useState<string>("");
-    const [projectNameNepali, setProjectNameNepali] = useState<string>("");
-    const [projectStatus, setProjectStatus] = useState<string>("new");
-    const [ward, setWard] = useState<string>("1");
-    const [projectBudgetCode, setProjectBudgetCode] = useState<string>("");
+const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm }) => {
+  const [projectNameEnglish, setProjectNameEnglish] = useState("");
+  const [projectNameNepali, setProjectNameNepali] = useState("");
+  const [projectStatus, setProjectStatus] = useState("new");
+  const [ward, setWard] = useState("1");
+  const [projectBudgetCode, setProjectBudgetCode] = useState("");
+
+  const { token, role } = useAuth();  // Access token and role from useAuth
   
-    const handleSaveDraft = () => {
-      const projectData = {
-        projectNameEnglish,
-        projectNameNepali,
-        projectStatus,
-        ward,
-        projectBudgetCode,
-        status: "Draft",
-      };
-  
-      // Save project to localStorage (first)
-      const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-      savedProjects.push(projectData);
-      localStorage.setItem("projects", JSON.stringify(savedProjects));
-  
-      // Update the state of projects in the parent component immediately
-      setProjects((prevProjects) => [
-        ...prevProjects,
-        { ...projectData, id: Math.random().toString(36).substr(2, 9) }, // Add an ID if necessary
-      ]);
-  
-      // Optionally, save it to the backend (backend request still happens)
-      axios
-        .post("/api/projects", projectData)
-        .then((response) => {
-          console.log("Project saved to backend:", response.data);
-          setProjects((prevProjects) => [...prevProjects, response.data]);
-        })
-        .catch((error) => {
-          console.error("Error saving to backend:", error);
-        });
-  
-      // Close form and show success notification
-      setIsFormOpen(false);
-      toast.success(`Project "${projectNameEnglish}" saved as Draft!`);
+  const handleSaveDraft = () => {
+    const projectData = {
+      project_name: projectNameEnglish,
+      project_name_nepali: projectNameNepali,
+      project_status: "pending", 
+      ward_id: ward,
+      project_budget_code: projectBudgetCode,
+      status: "Draft",
     };
-  
-    const handleSubmitProject = () => {
-      const projectData = {
-        projectNameEnglish,
-        projectNameNepali,
-        projectStatus,
-        ward,
-        projectBudgetCode,
-        status: "Submitted",
-      };
-  
-      // Save to localStorage (first)
-      const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-      savedProjects.push(projectData);
-      localStorage.setItem("projects", JSON.stringify(savedProjects));
-  
-      // Update the state of projects in the parent component immediately
-      setProjects((prevProjects) => [
-        ...prevProjects,
-        { ...projectData, id: Math.random().toString(36).substr(2, 9) }, // Add an ID if necessary
-      ]);
-  
-      // Submit project to backend (backend request still happens)
-      axios
-        .post("/api/projects", projectData)
-        .then((response) => {
-          console.log("Project submitted:", response.data);
-          setProjects((prevProjects) => [...prevProjects, response.data]);
-        })
-        .catch((error) => {
-          console.error("Error submitting project:", error);
-        });
-  
-      // Close form and show success notification
-      setIsFormOpen(false);
-      toast.success(`Project "${projectNameEnglish}" submitted successfully!`);
+    axios
+      .post("/api/projects/draftProjects", projectData, {
+        headers: { Authorization: `Bearer ${token}` }  
+      })
+      .then((response) => {
+        console.log("Project saved as draft:", response.data);
+        setProjects((prevProjects) => [
+          ...prevProjects,
+          response.data,
+        ]);
+        toast.success(`Project "${projectNameEnglish}" saved as Draft!`);
+      })
+      .catch((error) => {
+        console.error("Error saving to backend:", error);
+        toast.error("Failed to save draft.");
+      });
+
+    // Close the form
+    setIsFormOpen(false);
+  };
+
+  const handleSubmitProject = () => {
+    const projectData = {
+      project_name: projectNameEnglish,
+      project_name_nepali: projectNameNepali,
+      project_status: "pending", // backend expects 'pending' for submitted
+      ward_id: ward,
+      project_budget_code: projectBudgetCode,
+      status: "Submitted",
     };
+
+    // Submit project to backend
+    axios
+      .post("/api/projects/grantProjects", projectData, {
+        headers: { Authorization: `Bearer ${token}` }  // Include token in headers
+      })
+      .then((response) => {
+        console.log("Project submitted:", response.data);
+        setProjects((prevProjects) => [
+          ...prevProjects,
+          response.data,
+        ]);
+        toast.success(`Project "${projectNameEnglish}" submitted successfully!`);
+      })
+      .catch((error) => {
+        console.error("Error submitting project:", error);
+        toast.error("Failed to submit project.");
+      });
+
+    // Close the form
+    setIsFormOpen(false);
+  };
+
   return (
     <div className="w-full h-auto bg-[#F7FAFC] flex justify-center items-center py-10">
       <div className="bg-white w-4/5 max-w-5xl p-8 rounded-lg shadow-lg flex">
@@ -150,18 +142,16 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRol
           />
 
           <Label className="text-sm font-semibold">Ward</Label>
-          <select
+          <Input
             name="ward"
             value={ward}
             onChange={(e) => setWard(e.target.value)}
+            placeholder="Enter Ward"
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="1">Ward 1</option>
-            <option value="2">Ward 2</option>
-            <option value="3">Ward 3</option>
-          </select>
+            required
+          />
 
-          <div className="flex justify-end mt-6 space-x-4">
+<div className="flex justify-end mt-6 space-x-4">
             <Button
               onClick={handleSaveDraft}
               className="w-[200px] py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none"
