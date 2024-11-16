@@ -77,7 +77,6 @@ const AddProjectForm = () => {
   };
 
   return (
-<<<<<<< HEAD
     <div className="w-full h-auto bg-[#F7FAFC] flex justify-center items-center py-10">
             
       <div className="bg-white w-4/5 max-w-5xl p-8 rounded-lg shadow-lg flex">
@@ -280,7 +279,6 @@ const AddProjectForm = () => {
       >
         Upload Document
       </Label>
-=======
     {/* <div className="w-full h-[100vh] bg-blue-500 flex justify-center items-center">
       <div className="bg-white w-3/4 h-[90vh] grid grid-cols-6 md:grid-cols-12 grid-rows-6 gap-2 p-4 rounded shadow-lg">
       <div className="flex flex-col items-start col-span-6">
@@ -317,7 +315,6 @@ SUBMIT
         </Button>
       </div>
       </div> */}
->>>>>>> b2deaea98fd6acbd71288a25ca130c632acd3b1c
     </div>
   </div>
 </div>
