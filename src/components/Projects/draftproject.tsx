@@ -22,7 +22,7 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRol
 
     try {
       const response = await apiClient.post("/draftProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }  // Include token in headers
+        headers: { Authorization: token }  // Include token in headers
       });
       setProjects((prevProjects) => [
         ...prevProjects,
@@ -49,7 +49,7 @@ const AddInitialProjectForm = ({ setProjects, setIsFormOpen, cancelForm, userRol
 
     try {
       const response = await apiClient.post("/grantProjects", projectData, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: token }
       });
       setProjects((prevProjects) => [
         ...prevProjects,

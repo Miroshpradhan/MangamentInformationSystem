@@ -24,13 +24,13 @@ const DashboardPage = () => {
     const fetchProjects = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await apiClient.get('/grantProjects', {
+        const response = await apiClient.get('/grantProject', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: token, // Add the token if required
           },
         });
-
+        console.log("response ",response);
         if (response.status === 200) {
           setProjects(response.data.data.project); // Assuming the API returns the project list in `data.data.project`
         } else {
@@ -48,7 +48,7 @@ const DashboardPage = () => {
     // Filter projects based on the search query
     setFilteredProjects(
       projects.filter((project) =>
-        project.name.toLowerCase().includes(searchQuery.toLowerCase())
+        project.project_name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
   }, [projects, searchQuery]); // Filter projects when `projects` or `searchQuery` changes
@@ -112,10 +112,10 @@ const DashboardPage = () => {
             className="border p-4 rounded shadow-md flex justify-between items-center"
           >
             <div>
-              <h3 className="font-bold text-lg">{project.name}</h3>
-              <p className="text-sm text-gray-600">Last updated: {project.lastUpdated}</p>
+              <h3 className="font-bold text-lg">{project.project_name}</h3>
+              <p className="text-sm text-gray-600">Last updated: {project.updated_at}</p>
               <p className="text-sm">
-                <span className="font-semibold">Ward:</span> {project.ward}
+                <span className="font-semibold">Ward:</span> {project.ward_id}
               </p>
               <p className="inline-block mt-2 px-2 py-1 text-xs font-semibold text-white bg-orange-500 rounded">
                 {project.status}
