@@ -7,60 +7,10 @@ const GrantsPage: React.FC = () => {
   const [grantProjects, setGrantProjects] = useState<any[]>([]);
   const [currentProject, setCurrentProject] = useState<any>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  // Mock data for demo project when the backend is not working
-  const demoProjects = [
-    { 
-      id: 1, 
-      name: 'Community Health Project', 
-      description: 'A project focused on improving community health services.', 
-      status: 'pending', 
-      ward: 'Ward 5', 
-      lastUpdated: '2024-10-15',
-      municipality: "Municipality Name", 
-      phone: "123-456-7890", 
-      projectName: "Community Health Project",
-      totalCost: 1000000, // Example value
-      costInWords: "One million dollars",
-      projectStatus: "Ongoing", 
-      duration: "12 Months", 
-      populationBenefits: "2000", 
-      isApproved: true, // Example value
-      documents: {
-        document1: null, 
-        document2: null, 
-        document3: null, 
-        document4: null, 
-        document5: null
-      }
-    }, 
-    { 
-      id: 2, 
-      name: 'Education for All', 
-      description: 'A project providing free education materials to underprivileged areas.', 
-      status: 'Pending', 
-      ward: 'Ward 7', 
-      lastUpdated: '2024-10-10',
-      municipality: "Municipality Name", 
-      phone: "123-456-7890", 
-      projectName: "Education for All",
-      totalCost: 500000, // Example value
-      costInWords: "Five hundred thousand dollars",
-      projectStatus: "Pending", 
-      duration: "6 Months", 
-      populationBenefits: "5000", 
-      isApproved: false, // Example value
-      documents: {
-        document1: null, 
-        document2: null, 
-        document3: null, 
-        document4: null, 
-        document5: null
-      }
-    }
-  ];
-  
+  const demoProjects = [ /* demo projects here */ ];
 
-  const userRole = localStorage.getItem('userRole') || 'projectEditor';
+  // Get user role from localStorage (cannot be changed from the frontend)
+  const userRole = localStorage.getItem('userRole') || 'projectEditor'; // Default to 'projectEditor' if no role exists
 
   // Fetch grant projects when the component mounts
   useEffect(() => {
@@ -94,7 +44,7 @@ const GrantsPage: React.FC = () => {
     }
   };
 
-  // Handle approval of a project
+  // Handle approve of a project for projectApprover role
   const handleApprove = async (projectId: number) => {
     try {
       const response = await apiClient.post(`/approveProject/${projectId}`);
@@ -115,7 +65,7 @@ const GrantsPage: React.FC = () => {
     }
   };
 
-  // Handle disapproval of a project
+  // Handle disapproval of a project for projectApprover role
   const handleDisapprove = async (projectId: number) => {
     try {
       const response = await apiClient.post(`/disapproveProject/${projectId}`);
@@ -134,61 +84,37 @@ const GrantsPage: React.FC = () => {
       alert('Failed to disapprove the project.');
     }
   };
-// Function to handle the download of project data in PDF format
-const handleDownload = (project: any) => {
-  const doc = new jsPDF();
-  
-  // Project data to include in PDF
-  const projectData = `
-    Project Name: ${project?.projectName || 'N/A'}
-    Municipality: ${project?.municipality || 'N/A'}
-    Phone: ${project?.phone || 'N/A'}
-    Total Cost: ${project?.totalCost ? `$${project.totalCost.toLocaleString()}` : 'N/A'}
-    Cost in Words: ${project?.costInWords || 'N/A'}
-    Duration: ${project?.duration || 'N/A'}
-    Population Benefits: ${project?.populationBenefits || 'N/A'}
-    Project Status: ${project?.projectStatus || 'N/A'}
-    Is Approved: ${project?.isApproved ? 'Yes' : 'No'}
-    
-    Documents:
-    Document 1: ${project?.documents.document1 ? 'Available' : 'Not Available'}
-    Document 2: ${project?.documents.document2 ? 'Available' : 'Not Available'}
-    Document 3: ${project?.documents.document3 ? 'Available' : 'Not Available'}
-    Document 4: ${project?.documents.document4 ? 'Available' : 'Not Available'}
-    Document 5: ${project?.documents.document5 ? 'Available' : 'Not Available'}
-    
-    Description: ${project?.description || 'N/A'}
-    Ward: ${project?.ward || 'N/A'}
-    Last Updated: ${project?.lastUpdated || 'N/A'}
-  `;
 
-  // Add project data to the PDF
-  doc.text(projectData, 10, 10);
-
-  // Download the PDF
-  doc.save(`${project?.projectName || 'project_data'}.pdf`);
-};
-
-
-  // Handle user role change (simulating role switching)
-  const handleRoleChange = (role: string) => {
-    localStorage.setItem('userRole', role); // Store the new role in localStorage
-    window.location.reload(); // Reload the page to reflect role changes
+  // Handle PDF download
+  const handleDownload = (project: any) => {
+    const doc = new jsPDF();
+    const projectData = `
+      Project Name: ${project?.projectName || 'N/A'}
+      Municipality: ${project?.municipality || 'N/A'}
+      Phone: ${project?.phone || 'N/A'}
+      Total Cost: ${project?.totalCost ? `$${project.totalCost.toLocaleString()}` : 'N/A'}
+      Cost in Words: ${project?.costInWords || 'N/A'}
+      Duration: ${project?.duration || 'N/A'}
+      Population Benefits: ${project?.populationBenefits || 'N/A'}
+      Project Status: ${project?.projectStatus || 'N/A'}
+      Is Approved: ${project?.isApproved ? 'Yes' : 'No'}
+      Documents:
+      Document 1: ${project?.documents.document1 ? 'Available' : 'Not Available'}
+      Document 2: ${project?.documents.document2 ? 'Available' : 'Not Available'}
+      Document 3: ${project?.documents.document3 ? 'Available' : 'Not Available'}
+      Document 4: ${project?.documents.document4 ? 'Available' : 'Not Available'}
+      Document 5: ${project?.documents.document5 ? 'Available' : 'Not Available'}
+      Description: ${project?.description || 'N/A'}
+      Ward: ${project?.ward || 'N/A'}
+      Last Updated: ${project?.lastUpdated || 'N/A'}
+    `;
+    doc.text(projectData, 10, 10);
+    doc.save(`${project?.projectName || 'project_data'}.pdf`);
   };
 
   return (
     <div className="relative">
       <h3 className="text-xl font-semibold mb-4">Grant Project Proposal</h3>
-
-      {/* Role Selector */}
-      <div className="mb-4">
-        <button onClick={() => handleRoleChange('projectEditor')} className="mr-2 bg-blue-500 text-white py-2 px-4 rounded">
-          Switch to Project Editor
-        </button>
-        <button onClick={() => handleRoleChange('projectApprover')} className="bg-green-500 text-white py-2 px-4 rounded">
-          Switch to Project Approver
-        </button>
-      </div>
 
       {/* Add New Project Button */}
       {!isFormVisible && (
@@ -199,30 +125,24 @@ const handleDownload = (project: any) => {
           + Add New Project
         </button>
       )}
-        {/* Display AddProjectForm when the form is visible */}
+
+      {/* Display AddProjectForm when the form is visible */}
       {isFormVisible && (
         <div className="relative">
-          <AddProjectForm/>
-
-          {/* "Back" Button when form is visible */}
+          <AddProjectForm />
           <button
             onClick={() => setIsFormVisible(false)}
-            className="absolute top-1/3 right-10 transform -translate-y-1/2 bg-red-500 text-white py-3 px-4 rounded-full shadow-lg flex items-center hover:bg-blue-700 transition duration-300 z-10"
+            className="absolute top-1/4 right-10 transform -translate-y-1/2 bg-red-500 text-white py-3 px-4 rounded-full shadow-lg flex items-center hover:bg-blue-700 transition duration-300 z-10"
           >
             Close
           </button>
         </div>
       )}
 
-
       {/* Grant Projects List */}
       {!isFormVisible && (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Grant Project Proposal</h2>
-          <p className="text-gray-600 mb-4">
-            Select a project to propose for a grant or create a new project.
-          </p>
-
+        
           <div className="space-y-4">
             {grantProjects.map((project) => (
               <div key={project.id} className="border p-4 rounded shadow-md flex justify-between items-center">
@@ -232,36 +152,31 @@ const handleDownload = (project: any) => {
                   <p className="text-sm"><span className="font-semibold">Ward:</span> {project.ward}</p>
                 </div>
 
-                {/* Conditional rendering of buttons */}
+                {/* Conditional rendering of buttons based on userRole */}
                 <div className="flex space-x-2">
-                 {userRole === 'projectEditor' && project.status !== 'pending' && (
-  <button
-    onClick={() => handleEdit(project)}
-    className="p-2 bg-blue-500 text-white rounded"
-  >
-    Edit
-  </button>
-)}
+                  {userRole === 'projectEditor' && project.status !== 'pending' && (
+                    <button
+                      onClick={() => handleEdit(project)}
+                      className="p-2 bg-blue-500 text-white rounded"
+                    >
+                      Edit
+                    </button>
+                  )}
 
-
-                  {userRole === 'projectApprover' && (
+                  {userRole === 'projectApprover' && project.status === 'pending' && (
                     <>
-                      {project.status === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => handleApprove(project.id)}
-                            className="p-2 bg-green-500 text-white rounded"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleDisapprove(project.id)}
-                            className="p-2 bg-red-500 text-white rounded"
-                          >
-                            Disapprove
-                          </button>
-                        </>
-                      )}
+                      <button
+                        onClick={() => handleApprove(project.id)}
+                        className="p-2 bg-green-500 text-white rounded"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleDisapprove(project.id)}
+                        className="p-2 bg-red-500 text-white rounded"
+                      >
+                        Disapprove
+                      </button>
                     </>
                   )}
 

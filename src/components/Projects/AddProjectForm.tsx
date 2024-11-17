@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label, Input, Button } from '@/components/ui';
 import apiClient from "@/config/axios";
 // Function to convert number to words
@@ -52,6 +52,26 @@ const AddProjectForm = () => {
     }
     return true;  
   };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked, files } = e.target;
+  
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : files ? files[0] : value,
+    }));
+  };
+  
+  const handleDocumentChange = (name: string, file: File | null) => {
+    setFormValues((prev) => ({
+      ...prev,
+      documents: {
+        ...prev.documents,
+        [name]: file,
+      },
+    }));
+  };
+  
   const handleSave = async (data) => {
     const projectData = {
       project_name: data.projectNameEnglish,
@@ -92,62 +112,74 @@ const AddProjectForm = () => {
   
     setIsFormOpen(false);
   };
-  
-  const handleSubmit = async (values: { 
-    municipality: string; 
-    phone: string;
-    projectName: string;
-    totalCost: string;
-    costInWords: string;
-    projectStatus: string;
-    duration: string;
-    populationBenefits: string;
-    isApproved: boolean;
-    documents: {
-      document1: File | null;
-      document2: File | null;
-      document3: File | null;
-      document4: File | null;
-      document5: File | null;
-    }
-  }) => {
-    setIsSubmitting(true);
-    
-    // Prepare the form data object
+ const document1Ref = useRef<HTMLInputElement>(null);
+  const document2Ref = useRef<HTMLInputElement>(null);
+  const document3Ref = useRef<HTMLInputElement>(null);
+  const document4Ref = useRef<HTMLInputElement>(null);
+  const document5Ref = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     const formData = new FormData();
-    formData.append("municipality", values.municipality);
-    formData.append("phone", values.phone);
-    formData.append("projectName", values.projectName);
-    formData.append("totalCost", values.totalCost);
-    formData.append("costInWords", costInWords); // cost in words
-    formData.append("projectStatus", values.projectStatus);
-    formData.append("duration", values.duration);
-    formData.append("populationBenefits", values.populationBenefits);
-    formData.append("isApproved", String(values.isApproved));
-  
-    // Append document files if provided
-    if (values.documents.document1) formData.append("document1", values.documents.document1);
-    if (values.documents.document2) formData.append("document2", values.documents.document2);
-    if (values.documents.document3) formData.append("document3", values.documents.document3);
-    if (values.documents.document4) formData.append("document4", values.documents.document4);
-    if (values.documents.document5) formData.append("document5", values.documents.document5);
-  
+
+    // Get other form values
+    const municipality = (document.querySelector('input[name="municipality"]') as HTMLInputElement)?.value;
+    const phone = (document.querySelector('input[name="phone"]') as HTMLInputElement)?.value;
+    const projectName = (document.querySelector('input[name="projectName"]') as HTMLInputElement)?.value;
+    const totalCost = (document.querySelector('input[name="totalCost"]') as HTMLInputElement)?.value;
+    const costInWords = (document.querySelector('input[name="costInWords"]') as HTMLInputElement)?.value;
+    const duration = (document.querySelector('input[name="duration"]') as HTMLInputElement)?.value;
+    const populationBenefits = (document.querySelector('input[name="populationBenefits"]') as HTMLInputElement)?.value;
+    const projectStatus = (document.querySelector('input[name="status"]:checked') as HTMLInputElement)?.value;
+    const isApproved = (document.querySelector('input[name="isApproved"]:checked') as HTMLInputElement)?.value;
+
+    // Append form data (basic fields)
+    formData.append("municipality", municipality);
+    formData.append("phone", phone);
+    formData.append("projectName", projectName);
+    formData.append("totalCost", totalCost);
+    formData.append("costInWords", costInWords);
+    formData.append("duration", duration);
+    formData.append("populationBenefits", populationBenefits);
+    formData.append("projectStatus", projectStatus);
+    formData.append("isApproved", isApproved);
+
+    // Access file inputs through refs and append files to FormData
+    if (document1Ref.current?.files?.[0]) {
+      formData.append("document1", document1Ref.current.files[0]);
+    }
+    if (document2Ref.current?.files?.[0]) {
+      formData.append("document2", document2Ref.current.files[0]);
+    }
+    if (document3Ref.current?.files?.[0]) {
+      formData.append("document3", document3Ref.current.files[0]);
+    }
+    if (document4Ref.current?.files?.[0]) {
+      formData.append("document4", document4Ref.current.files[0]);
+    }
+    if (document5Ref.current?.files?.[0]) {
+      formData.append("document5", document5Ref.current.files[0]);
+    }
+
     try {
-      // Call the API to submit the form data
-      await apiClient.post('/grantProjects', formData, {
+      setIsSubmitting(true);
+      const response = await apiClient.post("/grantProjects", formData, {
         headers: {
-          Authorization: token,  
-          "Content-Type": "multipart/form-data",
+          Authorization: token, // Add your token here
         },
       });
+
       alert("Project submitted successfully.");
     } catch (error) {
       console.error("Error submitting project:", error);
-      alert("Failed to submit project.");
+      const errorMessage = error.response?.data?.message || "Failed to submit project.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   
   const handleTotalCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -158,168 +190,168 @@ const AddProjectForm = () => {
   };
 
   return (
-    <div className="w-full h-auto bg-[#F7FAFC] flex justify-center items-center py-10">
-            
-      <div className="bg-white w-4/5 max-w-5xl p-8 rounded-lg shadow-lg flex">
-     
-        <div className="flex-1 space-y-6">
-        
+   <div className="w-full h-auto bg-[#F7FAFC] flex justify-center items-center py-10">
+ <form className="bg-white w-4/5 max-w-5xl p-8 rounded-lg shadow-lg flex" onSubmit={handleSubmit}>
+   
+    <div className="flex-1 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col space-y-4">
+          <Label className="text-sm font-semibold">Municipality Name (Local Level)</Label>
+          <Input
+            name="municipality"
+            placeholder="Enter Municipality Name"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-     
-            <div className="flex flex-col space-y-4">
-              <Label className="text-sm font-semibold">Municipality Name (Local Level)</Label>
-              <Input
-                name="municipality"
-                placeholder="Enter Municipality Name"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+          <Label className="text-sm font-semibold">Phone</Label>
+          <Input
+            name="phone"
+            placeholder="Enter Phone Number"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-              <Label className="text-sm font-semibold">Phone</Label>
-              <Input
-                name="phone"
-                placeholder="Enter Phone Number"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+          <Label className="text-sm font-semibold">Name of the Project</Label>
+          <Input
+            name="projectName"
+            placeholder="Enter Project Name"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-              <Label className="text-sm font-semibold">Name of the Project</Label>
-              <Input
-                name="projectName"
-                placeholder="Enter Project Name"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+          <Label className="text-sm font-semibold">Total Cost of the Project</Label>
+          <Input
+            name="totalCost"
+            type="text" 
+            value={totalCost}
+            onChange={handleTotalCostChange}
+            placeholder="Enter Total Cost"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-              <Label className="text-sm font-semibold">Total Cost of the Project</Label>
-              <Input
-                name="totalCost"
-                type="text" 
-                value={totalCost}
-                onChange={handleTotalCostChange}
-                placeholder="Enter Total Cost"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+          <Label className="text-sm font-semibold">Project Duration (Time to Complete)</Label>
+          <Input
+            name="duration"
+            placeholder="Enter Time Taken"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-              <Label className="text-sm font-semibold">Project Duration (Time to Complete)</Label>
-              <Input
-                name="duration"
-                placeholder="Enter Time Taken"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+          <Label className="text-sm font-semibold">Potential Population Benefits</Label>
+          <Input
+            name="populationBenefits"
+            placeholder="Enter Population Benefits"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          
+          <Label className="text-sm font-semibold">Project Status</Label>
+          <div className="flex space-x-4">
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="draft"
+                name="status"
+                value="draft"
+                checked={projectStatus === "draft"}
+                onChange={() => setProjectStatus("draft")}
               />
+              <Label htmlFor="draft" className="ml-2 text-sm">Draft</Label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="ongoing"
+                name="status"
+                value="ongoing"
+                checked={projectStatus === "ongoing"}
+                onChange={() => setProjectStatus("ongoing")}
+              />
+              <Label htmlFor="ongoing" className="ml-2 text-sm">Ongoing</Label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="completed"
+                name="status"
+                value="completed"
+                checked={projectStatus === "completed"}
+                onChange={() => setProjectStatus("completed")}
+              />
+              <Label htmlFor="completed" className="ml-2 text-sm">Completed</Label>
+            </div>
+          </div>
 
-              <Label className="text-sm font-semibold">Potential Population Benefits</Label>
-              <Input
-                name="populationBenefits"
-                placeholder="Enter Population Benefits"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-                 <Label className="text-sm font-semibold">Project Status</Label>
-              <div className="flex space-x-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="draft"
-                    name="status"
-                    value="draft"
-                    checked={projectStatus === "draft"}
-                    onChange={() => setProjectStatus("draft")}
-                  />
-                  <Label htmlFor="draft" className="ml-2 text-sm">Draft</Label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="ongoing"
-                    name="status"
-                    value="ongoing"
-                    checked={projectStatus === "ongoing"}
-                    onChange={() => setProjectStatus("ongoing")}
-                  />
-                  <Label htmlFor="ongoing" className="ml-2 text-sm">Ongoing</Label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="completed"
-                    name="status"
-                    value="completed"
-                    checked={projectStatus === "completed"}
-                    onChange={() => setProjectStatus("completed")}
-                  />
-                  <Label htmlFor="completed" className="ml-2 text-sm">Completed</Label>
-                </div>
+          <div className="flex flex-col space-y-6 mt-10">
+            {/* Section Header */}
+            <h2 className="text-2xl font-semibold text-[#1D4ED8]">Required Documents</h2>
+
+            {/* Document 1 */}
+            <div className="flex flex-col space-y-2">
+              <Label className="text-sm font-semibold">Document 1: Project Proposal</Label>
+              <div className="flex items-center">
+                <Input
+                  type="file"
+                  name="document1"
+                  className="hidden"
+                  id="document1"
+                  aria-label="Upload Project Proposal"
+                  required
+                />
+                <Label
+                  htmlFor="document1"
+                  className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Upload Document
+                </Label>
               </div>
-              <div className="flex flex-col space-y-6 mt-10">
-  {/* Section Header */}
-  <h2 className="text-2xl font-semibold text-[#1D4ED8]">Required Documents</h2>
+            </div>
 
-  {/* Document 1 */}
-  <div className="flex flex-col space-y-2">
-    <Label className="text-sm font-semibold">Document 1: Project Proposal</Label>
-    <div className="flex items-center">
-      <Input
-        type="file"
-        name="document1"
-        className="hidden"
-        id="document1"
-        aria-label="Upload Project Proposal"
-        required
-      />
-      <Label
-        htmlFor="document1"
-        className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Upload Document
-      </Label>
-    </div>
-  </div>
+            {/* Document 2 */}
+            <div className="flex flex-col space-y-2">
+              <Label className="text-sm font-semibold">Document 2: Financial Breakdown</Label>
+              <div className="flex items-center">
+                <Input
+                  type="file"
+                  name="document2"
+                  className="hidden"
+                  id="document2"
+                  aria-label="Upload Financial Breakdown"
+                  required
+                />
+                <Label
+                  htmlFor="document2"
+                  className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Upload Document
+                </Label>
+              </div>
+            </div>
 
-  {/* Document 2 */}
-  <div className="flex flex-col space-y-2">
-    <Label className="text-sm font-semibold">Document 2: Project Budget</Label>
-    <div className="flex items-center">
-      <Input
-        type="file"
-        name="document2"
-        className="hidden"
-        id="document2"
-        aria-label="Upload Project Budget"
-        required
-      />
-      <Label
-        htmlFor="document2"
-        className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Upload Document
-      </Label>
-    </div>
-  </div>
+            {/* Document 3 */}
+            <div className="flex flex-col space-y-2">
+              <Label className="text-sm font-semibold">Document 3: Impact Assessment</Label>
+              <div className="flex items-center">
+                <Input
+                  type="file"
+                  name="document3"
+                  className="hidden"
+                  id="document3"
+                  aria-label="Upload Impact Assessment"
+                  required
+                />
+                <Label
+                  htmlFor="document3"
+                  className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Upload Document
+                </Label>
+              </div>
+            </div>
+         
 
-  {/* Document 3 */}
-  <div className="flex flex-col space-y-2">
-    <Label className="text-sm font-semibold">Document 3: Timeline</Label>
-    <div className="flex items-center">
-      <Input
-        type="file"
-        name="document3"
-        className="hidden"
-        id="document3"
-        aria-label="Upload Project Timeline"
-        required
-      />
-      <Label
-        htmlFor="document3"
-        className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Upload Document
-      </Label>
-    </div>
-  </div>
 
   {/* Document 4 */}
   <div className="flex flex-col space-y-2">
@@ -360,42 +392,7 @@ const AddProjectForm = () => {
       >
         Upload Document
       </Label>
-    {/* <div className="w-full h-[100vh] bg-blue-500 flex justify-center items-center">
-      <div className="bg-white w-3/4 h-[90vh] grid grid-cols-6 md:grid-cols-12 grid-rows-6 gap-2 p-4 rounded shadow-lg">
-      <div className="flex flex-col items-start col-span-6">
-      <Label className="mb-2 text-light capitalize">Project Name</Label>
-      <Input name="username" placeholder="Enter username" className="w-full p-2 border border-gray-300 rounded" required />
-      </div>
-      <div className="flex flex-col items-start col-span-6">
-      <Label className="mb-2 text-light capitalize">Project Type</Label>
-      <Input name="username" placeholder="Enter Type" className="w-full p-2 border border-gray-300 rounded" required />
-      </div>
-
-      <div className="flex flex-col items-start col-span-6">
-      <Label className="mb-2 text-light capitalize">Project Deadline</Label>
-      <Input name="username" placeholder="Enter project deadline" className="w-full p-2 border border-gray-300 rounded" type="date" required />
-      </div>
-
-      <div className="flex flex-col items-start col-span-6">
-      <Label className="mb-2 text-light capitalize">Project Status</Label>
-      <Input name="status" placeholder="Enter project status" className="w-full p-2 border border-gray-300 rounded" required />
-      </div>
-
-      <div className="flex flex-col items-start col-span-6 md:col-span-full row-span-3">
-      <Label className="mb-2 text-light capitalize">Project Details</Label>
-      <Textarea name="username" placeholder="Enter project details" className="w-full p-2 border border-gray-300 rounded" required />
-      </div>
-      <div className="flex flex-col items-start col-span-3 md:col-span-6 ">
-        <Button className="button bg-green-500 hover:bg-green-800 md:px-8">
-SAVE
-        </Button>
-      </div>
-      <div className="flex flex-col items-end col-span-3 md:col-span-6">
-        <Button className="button bg-blue-500 hover:bg-blue-900 md:px-8">
-SUBMIT
-        </Button>
-      </div>
-      </div> */}
+    
     </div>
   </div>
 </div>
@@ -448,7 +445,7 @@ SUBMIT
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
