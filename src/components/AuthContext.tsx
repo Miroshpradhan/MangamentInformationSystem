@@ -24,6 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = jwtDecode<{ role: string; municipalityId: string }>(token);
+      console.log(decodedToken);
+      console.log("User role: ",role);
       setMunicipalityId(decodedToken.municipalityId); 
       setRole(decodedToken.role);
     }
@@ -32,15 +34,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login function to set token and municipality code
   const login = (token: string, municipalityCode: string) => {
+
     localStorage.setItem('token', token);
-    localStorage.setItem('municipalityCode', municipalityCode); // Save municipalityCode to local storage
-    setIsLoggedIn(true);
-    setMunicipalityCode(municipalityCode); // Set municipalityCode in state
+    localStorage.setItem('municipalityCode', municipalityCode);
     const decodedToken = jwtDecode<{ role: string; municipalityId: string }>(token);
-    console.log(decodedToken);
+    console.log(decodedToken); // Debugging to ensure the token is being decoded correctly
+
+    setIsLoggedIn(true);
+    setMunicipalityCode(municipalityCode);
     setMunicipalityId(decodedToken.municipalityId);
     setRole(decodedToken.role);
-  };
+  };
 
   const logout = () => {
     localStorage.removeItem('token');

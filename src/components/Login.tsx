@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { useNavigate } from 'react-router-dom';
 import apiClient from "@/config/axios";
 import { useAuth } from './AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 const loginSchema = Yup.object().shape({
   identifier: Yup.string().required("Identifier (email/username) is required"),
@@ -45,13 +46,17 @@ const Login: React.FC = () => {
         data: encryptedData,
         municipalityCode: values.municipalityCode,
       });
+      console.log(response);
 
       if (response.status === 200 && response.data.data.token) {
         const token = response.data.data.token;
+        localStorage.setItem('token', token);
+        const decodedToken = jwtDecode<{ role: string; municipalityId: string }>(token);
+        console.log("decode", decodedToken);
         login(token, values.municipalityCode); // Update context state
         toast.success('Login successful');
         navigate('/dashboard');
-        window.location.reload(); 
+        // window.location.reload(); 
         
       } else {
         toast.error('Login failed. Please try again.');

@@ -3,6 +3,8 @@ import apiClient from '@/config/axios';
 import jsPDF from 'jspdf';
 import AddProjectForm from '../Projects/AddProjectForm';
 import { toast } from 'sonner'; // Import the toast function from sonner
+import { useAuth } from '../AuthContext';
+
 
 const GrantsPage: React.FC = () => {
   const [grantProjects, setGrantProjects] = useState<any[]>([]);
@@ -47,19 +49,26 @@ const GrantsPage: React.FC = () => {
     },
   ];
 
-  const userRole = localStorage.getItem('userRole') || 'projectEditor';
-
+  // const userRole = localStorage.getItem('role') || 'projectEditor';
+  const {role} = useAuth()
+  console.log(role);
+  const token = localStorage.getItem('token');
   useEffect(() => {
     const fetchGrantProjects = async () => {
       try {
-        const storedProjects = localStorage.getItem('grantProjects');
-        if (storedProjects) {
-          setGrantProjects(JSON.parse(storedProjects));
-        } else {
-          const response = await apiClient.get('/grantProjects');
-          setGrantProjects(response.data.data);
+        // const storedProjects = localStorage.getItem('grantProjects');
+        // if (storedProjects) {
+        //   setGrantProjects(JSON.parse(storedProjects));
+        // } else {
+          const response = await apiClient.get('/grantProject', {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: token, // Add the token if required
+            }})
+          console.log(response);
+          setGrantProjects(response.data.data.project);
           localStorage.setItem('grantProjects', JSON.stringify(response.data.data));
-        }
+        // }
       } catch (error) {
         console.error('Error fetching grant projects:', error);
         setGrantProjects(demoProjects);
@@ -71,7 +80,7 @@ const GrantsPage: React.FC = () => {
   }, []);
 
   const handleEdit = (project: any) => {
-    if (userRole === 'projectEditor' && (project.status === 'disapproved' || project.status === 'draft')) {
+    if (role === 'projectEntry' && (project.status === 'disapproved' || project.status === 'draft')) {
       setCurrentProject(project);
       setIsFormVisible(true);
     } else {
@@ -177,8 +186,8 @@ const GrantsPage: React.FC = () => {
             {grantProjects.map((project) => (
               <div key={project.id} className="border p-4 rounded shadow-md flex justify-between items-center">
                 <div>
-                  <h3 className="font-bold text-lg">{project.name}</h3>
-                  <p className="text-sm text-gray-600">Last updated: {project.lastUpdated}</p>
+                  <h3 className="font-bold text-lg">{project.project_name}</h3>
+                  <p className="text-sm text-gray-600">Last updated: {project.updated_at}</p>
                   <p className="text-sm">
                     <span className="font-semibold">Ward:</span> {project.ward}
                   </p>
@@ -186,7 +195,7 @@ const GrantsPage: React.FC = () => {
 
                 {/* Conditional rendering of buttons based on userRole */}
                 <div className="flex space-x-2">
-                  {userRole === 'projectEditor' && project.status !== 'pending' && (
+                  {role === 'projectEditor' && project.status !== 'pending' && (
                     <button
                       onClick={() => handleEdit(project)}
                       className="p-2 bg-blue-500 text-white rounded"
@@ -195,7 +204,7 @@ const GrantsPage: React.FC = () => {
                     </button>
                   )}
 
-                  {userRole === 'projectApprover' && project.status === 'pending' && (
+                  {role === 'projectApprover' && project.status === 'pending' && (
                     <>
                       <button
                         onClick={() => handleApprove(project.id)}

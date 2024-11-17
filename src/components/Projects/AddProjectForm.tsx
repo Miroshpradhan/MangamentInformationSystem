@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Label, Input, Button } from "@/components/ui";
 import apiClient from "@/config/axios";
 
+// Function to convert numbers to words (for the budget)
 const numberToWords = (num: number): string => {
   const ones: string[] = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
   const tens: string[] = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -53,6 +54,7 @@ const AddProjectForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const token = localStorage.getItem('token'); // Authorization token
 
   // Handle input change for text fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -93,54 +95,82 @@ const AddProjectForm = () => {
     }
   }, [formData.budget]);
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true); // Disable submit button while submitting
+  // Handle save as draft
+  const handleSave = async () => {
+    setIsSubmitting(true); 
+
+    const formDataToSave = new FormData();
+
+    // Append all text fields to FormData
+    Object.keys(formData).forEach((key) => {
+      if (key !== "documents") {
+        formDataToSave.append(key, formData[key]);
+      }
+    });
+
+    // Append file fields to FormData
+    Object.keys(formData.documents).forEach((key) => {
+      if (formData.documents[key]) {
+        formDataToSave.append(key, formData.documents[key]);
+      }
+    });
 
     try {
-      // Create a FormData object to handle file uploads
-      const formDataToSend = new FormData();
-
-      // Append all text fields
-      Object.keys(formData).forEach((key) => {
-        if (key !== "documents") {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      // Append file fields
-      Object.keys(formData.documents).forEach((key) => {
-        if (formData.documents[key]) {
-          formDataToSend.append(key, formData.documents[key]);
-        }
-      });
-
-      // Send the form data to the backend API using apiClient
-      console.log("Form data being sent:", formData);  // For debugging, to view the FormData content
-      const token = localStorage.getItem('token');
-      const response = await apiClient.post("/grantProjects", formDataToSend, {
+      const response = await apiClient.post("/draftProjects", formDataToSave, {
         headers: {
-          Authorization: token, // Include the token in the Authorization header
-          "Content-Type": "multipart/form-data", // Ensure multipart/form-data for file uploads
+          Authorization: token, 
         },
       });
 
-      // Handle response success
-      console.log("Form submitted successfully", response.data);
-      alert("Project submitted successfully!");
+      console.log("Draft saved successfully", response.data);
+
+      alert("Draft saved successfully!");
+      
     } catch (error) {
-      // Handle submission error
-      console.error("Error submitting form:", error);
-      alert("Failed to submit project. Please try again.");
+      console.error("Error saving draft", error);
+      alert("Failed to save draft. Please try again.");
     } finally {
-      setIsSubmitting(false); // Re-enable the submit button
+      setIsSubmitting(false);
     }
   };
 
-  // Handle save as draft
-  const handleSave = () => {
-    console.log("Form saved as draft");
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true); 
+
+    const formDataToSend = new FormData();
+
+    // Append all text fields
+    Object.keys(formData).forEach((key) => {
+      if (key !== "documents") {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
+
+    // Append file fields
+    Object.keys(formData.documents).forEach((key) => {
+      if (formData.documents[key]) {
+        formDataToSend.append(key, formData.documents[key]);
+      }
+    });
+
+    try {
+      const response = await apiClient.post("/grantProjects", formDataToSend, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      console.log("Form submitted successfully", response);
+      alert("Project submitted successfully!");
+    } catch (error) {
+
+      console.error("Error submitting form:", error);
+      alert("Failed to submit project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -190,7 +220,7 @@ const AddProjectForm = () => {
                 required
               />
 
-              <Label className="text-sm font-semibold">Project projectDuration (Time to Complete)</Label>
+              <Label className="text-sm font-semibold">Project Duration (Time to Complete)</Label>
               <Input
                 name="projectDuration"
                 value={formData.projectDuration}
@@ -247,9 +277,8 @@ const AddProjectForm = () => {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-[#1D4ED8] mt-10">Required Documents</h2>
-
               {/* Document Inputs */}
+              <h2 className="text-2xl font-semibold text-[#1D4ED8] mt-10">Required Documents</h2>
               {["document1", "document2", "document3", "document4", "document5"].map((document, index) => (
                 <div key={index} className="flex flex-col space-y-2 mt-4">
                   <Label className="text-sm font-semibold">{`Document ${index + 1}`}</Label>
